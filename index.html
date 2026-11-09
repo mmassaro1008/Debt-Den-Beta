@@ -460,6 +460,16 @@ html.cb-rainbow .cardb,html.cb-rainbow .mb{background:repeating-linear-gradient(
 .guideb{display:block;width:100%;font-family:var(--px);font-size:8px;line-height:1.4;padding:9px 8px;border:2px solid var(--c);background:var(--n);color:var(--a);text-align:left;margin-bottom:6px}
 .guide{display:flex;flex-direction:column;gap:8px}.guide ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:5px}.guide li{color:var(--w);font-size:19px}.guide .odd td{font-size:18px;vertical-align:top}.guide .odd td{width:50%}.guide .odd td:last-child{text-align:left;color:var(--y);padding-left:10px}
 .gdet{border:2px solid var(--d);background:var(--e);padding:0 10px}.gdet summary{font-family:var(--px);font-size:9px;padding:12px 0;cursor:pointer;color:var(--y)}.gdet[open]{padding-bottom:10px}
+.cpbar{position:sticky;bottom:0;z-index:6;display:grid;grid-template-columns:1fr 2fr;gap:6px;background:var(--k);padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px));border-top:3px solid var(--y);margin:0 -2px}
+.cpbar .btn{margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}.cpbar .btn small{font-family:var(--vt);font-size:15px;text-transform:none}
+.cpress{border-color:var(--l);animation:fadein .3s}.prow{display:flex;flex-direction:column;gap:6px;padding:4px 0;border-top:1px dashed var(--d)}.prow:first-of-type{border-top:0}.pbtns{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.pbtns .chip{font-size:7px;min-height:38px;padding:2px}
+.cprop.allhw{background:#8a2f42;border-color:var(--w)}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.ititle{font-size:16px;color:var(--y);text-align:center;text-shadow:3px 3px 0 var(--r);animation:fadein .6s}
+.istory{font-size:22px;line-height:1.25;animation:fadein .8s .4s both}
+.intro .box{animation:fadein .6s .9s both}
+.iopts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.iopt{background:var(--e);border:2px solid var(--d);padding:8px;display:flex;flex-direction:column;gap:3px;min-width:0;animation:fadein .4s both}.iopt b{font-family:var(--px);font-size:8px;color:var(--y)}.iopt small{font-size:15px;color:var(--a)}.iopt p{font-size:17px;line-height:1.15;margin:0}
+.idots{display:flex;gap:8px;justify-content:center}.idots i{width:10px;height:10px;background:var(--d)}.idots i.on{background:var(--y)}
 #toasts{position:fixed;left:0;right:0;bottom:0;z-index:20;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:6px;padding:0 max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
 .toast{background:var(--n);border:3px solid var(--y);color:var(--w);padding:8px 12px;font-size:19px;max-width:460px;width:100%;transition:opacity .3s}
 .toast b{color:var(--y)}
@@ -872,7 +882,7 @@ function newRun(cfg){
      stats:{won:0,biggest:0,peak:100},newAch:[],newTiers:0,g:newG(),over:null,lvl0:M.lvl};
   S.debts.push(mkDebt(),mkDebt());S.energy=maxEnergy();S.next=rollMoves();S.quest=makeQuest();
   if(cfg.daily){const d=M.daily;if(d.last!==cfg.daily){const y=new Date();y.setDate(y.getDate()-1);d.streak=d.last===dstr(y)?d.streak+1:1;d.last=cfg.daily;d.bestStreak=Math.max(d.bestStreak,d.streak);checkTiers()}}
-  UI.bet=10;UI.tab='debts';UI.confirm=null;UI.scene='world';UI.room='home';UI.wx={street:30,home:70,casino:32,mart:32,bar:32};UI.panel=null;save();render();toast('Home sweet home. Walk over to the computer to check your debts.');
+  UI.bet=10;UI.tab='debts';UI.confirm=null;UI.scene='world';UI.room='home';UI.wx={street:30,home:70,casino:32,mart:32,bar:32};UI.panel=null;S.story=Math.floor(Math.random()*STORIES.length);UI.scene='intro';UI.introP=0;save();render();introStart();
 }
 if(S){S.mods=S.mods||[];S.heat=S.heat||0;S.ext=S.ext||0;S.g=Object.assign(newG(),S.g||{});['rl','pl','fl','sn'].forEach(k=>S.g[k].busy=false);if(!S.g.bj.hands)S.g.bj=newG().bj;if(!S.g.rl.bets)S.g.rl=newG().rl;if(!S.g.pk.seats)S.g.pk=newG().pk;S.g.pk.aiPending=false;['sl','wh','kn'].forEach(k=>S.g[k].busy=false);if(S.g.cr.phase==='fly'){S.g.cr.phase='done';S.g.cr.msg='The rocket left without you.'}if(S.martOpen===undefined)S.martOpen=true;S.buffs=S.buffs||[];S.trinkets=S.trinkets||{};S.karma=S.karma||0;S.pawned=S.pawned||{};S.lastBet=S.lastBet||{};for(const k in TICK)if(!S.stocks[k])S.stocks[k]={p:TICK[k].p,h:[TICK[k].p],own:0,cost:0,short:0,sColl:0};for(const k in S.stocks){S.stocks[k].short=S.stocks[k].short||0;S.stocks[k].sColl=S.stocks[k].sColl||0}if(S.over)UI.scene='title'}
 
@@ -1048,8 +1058,8 @@ function zoraPanel(){const used=S.zoraDay===S.day;return`<div class="box"><span 
 const loanLimit=()=>r5(250*(1+S.paid)*(1+.15*(S.heat||0)));
 function loanAct(a){if(S.debts.some(d=>d.loan)||a<5)return;S.cash+=a;S.loanN=(S.loanN||0)+1;S.debts.push({id:-S.loanN,who:'Quik Loans',amt:r5(a*1.3),due:S.day+3,loan:true});toast(`Vinnie counts out ${fmt(a)}. You owe ${fmt(r5(a*1.3))} by day ${S.day+3}.`);SFX.coin();checkCash()}
 function loanPanel(){const act=S.debts.find(d=>d.loan),lim=loanLimit();
-  return`<div class="box"><span class="lbl">Quik Loans · Vinnie</span><p>"Need cash fast? 30% fee, due in 3 days. Pay me at your computer like everybody else. Don’t make me come looking."</p>
-  ${act?`<p class="lose">You owe Vinnie ${fmt(act.amt)} by day ${act.due}. Miss it and the collectors come.</p>`:`<div class="g3">${[.25,.5,1].map(f=>{const a=r5(lim*f);return`<button class="btn sm" data-a="loan" data-v="${a}">Borrow ${fmt(a)}</button>`}).join('')}</div><p class="muted">One loan at a time. Your limit grows as you pay off debts.</p>`}</div>`}
+  return`<div class="box"><span class="lbl">Quik Loans · Vinnie</span><p>"Need cash fast? 30% fee, due in 3 days. Pay me here or online, I’m not picky. Don’t make me come looking."</p>
+  ${act?`<p class="lose">You owe Vinnie ${fmt(act.amt)} by day ${act.due}. Miss it and the collectors come.</p><div class="g2"><button class="btn green sm" data-a="pay" data-v="${act.id}" ${S.cash>=act.amt?'':'disabled'}>Pay back ${fmt(act.amt)}</button><button class="btn sm" data-a="paypart" data-v="${act.id}" ${S.cash>=1&&S.cash<act.amt?'':'disabled'}>Pay ${fmt(Math.min(Math.floor(S.cash),act.amt))}</button></div>`:`<div class="g3">${[.25,.5,1].map(f=>{const a=r5(lim*f);return`<button class="btn sm" data-a="loan" data-v="${a}">Borrow ${fmt(a)}</button>`}).join('')}</div><p class="muted">One loan at a time. Your limit grows as you pay off debts.</p>`}</div>`}
 const JOBS=[['flyers','Hand out flyers',1],['dishes','Wash dishes at the bar',2],['dog','Walk Mrs. Fenwick\u2019s dog',3]];
 const jobRate=()=>r5(Math.max(8,nextDue()*.05));
 function jobAct(k){const j=JOBS.find(x=>x[0]===k);if(!j)return;const e=j[2],w=S.today.work||0;if(S.energy<e||w+e>4)return;S.energy-=e;S.today.work=w+e;const pay=jobRate()*e;S.cash+=pay;SFX.coin();toast(`${j[1]}: +${fmt(pay)}.`);checkCash()}
@@ -1371,7 +1381,7 @@ function drawScenes(){document.querySelectorAll('canvas[data-s]').forEach(c=>{co
   if(k==='world')drawWorld(x);else if(k==='title')drawTitle(x);else if(k==='gus')drawGus(x);else if(k==='me')drawMe(x);
   else if(k.startsWith('ico-'))drawIcon(x,k.slice(4));else if(k.startsWith('spark-'))drawSpark(x,k.slice(6));
   else if(k==='plinko'&&!S.g.pl.busy)drawPlinko(x);else if(k==='snail'&&!S.g.sn.busy)drawSnails(x,S.g.sn.pos);
-  else if(k==='wheel'&&!S.g.wh.busy)drawWheel(x,S.g.wh.off||0);else if(k==='rwheel'&&!S.g.rl.busy)rlRest(x);else if(k==='crash')drawCrash(x);else if(k==='penguin')drawPenguin(x);else if(k==='craps')drawCrapsRest(x);else if(k==='sbw'){const g=SBW?sbGame(SBW.gid):(UI.sbLast&&sbGame(UI.sbLast));if(g&&g.res)drawSB(x,g,SBW?Math.min(1,(performance.now()-SBW.t0)/SBW.D):1)}else if(k==='collect'&&!COLL)drawCollect(x,10)})}
+  else if(k==='wheel'&&!S.g.wh.busy)drawWheel(x,S.g.wh.off||0);else if(k==='rwheel'&&!S.g.rl.busy)rlRest(x);else if(k==='crash')drawCrash(x);else if(k==='penguin')drawPenguin(x);else if(k==='craps')drawCrapsRest(x);else if(k==='sbw'){const g=SBW?sbGame(SBW.gid):(UI.sbLast&&sbGame(UI.sbLast));if(g&&g.res)drawSB(x,g,SBW?Math.min(1,(performance.now()-SBW.t0)/SBW.D):1)}else if(k==='collect'&&!COLL)drawCollect(x,10);else if(k==='intro'&&!INTRO)drawIntro(x,9)})}
 setInterval(()=>{frame++;if(document.hidden)return;document.querySelectorAll('canvas[data-anim]').forEach(c=>{const k=c.dataset.s;if(k==='world'&&UI.moving)return;const x=c.getContext('2d');x.imageSmoothingEnabled=false;const fn={world:drawWorld,title:drawTitle,gus:drawGus,penguin:drawPenguin}[k];if(fn)fn(x)})},RM?2000:380);
 
 /* ================= cards ================= */
@@ -1637,12 +1647,17 @@ const CP_HARD={4:7,6:9,8:9,10:7};
 const CP_PROP={any7:['Any 7','Next roll is 7',4],anycraps:['Any craps','2, 3 or 12',7],yo:['Yo 11','Next roll is 11',15],aces:['Aces','Snake eyes, 2',30],boxcars:['Boxcars','Midnight, 12',30]};
 const CP_LBL=k=>({pass:'Pass Line',dp:'Don’t Pass',come:'Come',dcome:'Don’t Come',podds:'Pass Odds',field:'Field'}[k]||(k.startsWith('place')?'Place '+k.slice(5):k.startsWith('hard')?'Hard '+k.slice(4):k.startsWith('comeN')?'Come '+k.slice(5):k.startsWith('dcomeN')?'Don’t Come '+k.slice(6):CP_PROP[k]?CP_PROP[k][0]:k));
 const cpTot=()=>Object.values(S.g.cp.bets).reduce((a,b)=>a+b,0);
+function cpPress(v){const s=S.g.cp;if(s.busy||!s.press)return;const [k,how]=v.split(':');const i=s.press.findIndex(p=>p.k===k);if(i<0)return;const b=s.bets[k]||0;
+  if(how==='full'||how==='half'){const add=how==='full'?b:Math.max(1,Math.floor(b/2));if(S.cash<add){toast('Not enough cash to press that.');return}S.cash-=add;s.bets[k]=b+add;gs('craps').bet+=add;SFX.coin();toast(`${CP_LBL(k)} pressed to ${fmt(b+add)}.`)}
+  else if(how==='down'){S.cash+=b;delete s.bets[k];SFX.coin()}
+  s.press.splice(i,1);save();render()}
 function cpAllowed(k){const s=S.g.cp,p=s.point;
   if(k==='pass'||k==='dp')return!p;if(k==='come'||k==='dcome')return!!p;
   if(k==='podds')return!!p&&!!s.bets.pass&&(s.bets.podds||0)<s.bets.pass*3;
   return true}
 function cpBet(k){
   const s=S.g.cp;if(s.busy)return;if(!cpAllowed(k)){toast(k==='podds'?'Odds go behind a Pass Line bet once the point is on, up to 3x.':(k==='pass'||k==='dp')?'Line bets go down before the come-out roll.':'Come bets work once the point is on.');return}
+  if(k==='hardall'){const a=clampBet();if(S.cash<a*4){toast(`All four hard ways cost ${fmt(a*4)}.`);return}[4,6,8,10].forEach(n=>{s.bets['hard'+n]=(s.bets['hard'+n]||0)+a});S.cash-=a*4;gs('craps').bet+=a*4;s.flash=null;SFX.coin();save();render();return}
   let a=clampBet();if(k==='podds')a=Math.min(a,s.bets.pass*3-(s.bets.podds||0));
   if(a<1||S.cash<a){toast(`You need ${fmt(Math.max(a,1))} for that chip.`);return}
   S.cash-=a;s.bets[k]=(s.bets[k]||0)+a;gs('craps').bet+=a;s.flash=null;S.lastBet.craps=a;SFX.coin();save();render();
@@ -1652,7 +1667,7 @@ function cpTakeDown(){const s=S.g.cp;if(s.busy)return;let back=0;for(const k in 
 function cpRoll(){
   const s=S.g.cp;if(s.busy||!cpTot())return;
   if(!s.point){if(S.energy<1){toast('A new come-out roll takes 1 energy.');return}placeBet('craps',0)}
-  s.busy=true;s.flash=null;const d=[1+Math.floor(rnd()*6),1+Math.floor(rnd()*6)];render();
+  s.busy=true;s.flash=null;s.press=null;const d=[1+Math.floor(rnd()*6),1+Math.floor(rnd()*6)];render();
   if(RM)return cpResolve(d);
   const c=$('canvas[data-s="craps"]');if(c)c.scrollIntoView({block:'center',behavior:RM?'auto':'smooth'});
   const t0=performance.now(),D=1250*SP();let lastFace=0,faces=[3,4];
@@ -1665,7 +1680,7 @@ function cpRoll(){
 function cpResolve(d){
   const s=S.g.cp,b=s.bets,t=d[0]+d[1],hard=d[0]===d[1],p=s.point;let stake=0,gross=0;const win=[],lose=[];
   const W=(k,amt,g,keep)=>{stake+=amt;gross+=g;win.push(k);if(!keep)delete b[k]};
-  const pay=(k,g)=>{gross+=g;win.push(k)};
+  const pressable=[];const pay=(k,g)=>{gross+=g;win.push(k);if(k.startsWith('place')||k.startsWith('hard'))pressable.push({k,w:g})};
   const L=(k)=>{stake+=b[k];lose.push(k);delete b[k]};
   // one-roll bets
   if(b.field){const m=t===2?3:t===12?4:[3,4,9,10,11].includes(t)?2:0;if(m)W('field',b.field,b.field*m);else L('field')}
@@ -1692,7 +1707,7 @@ function cpResolve(d){
     else if(t===7){if(b.pass)L('pass');if(b.podds)L('podds');if(b.dp)pay('dp',b.dp);s.point=0;s.made=0;call='Seven out! Line away.';big=['SEVEN OUT','ouch']}
     else call=`${t}${hard&&[4,6,8,10].includes(t)?' the hard way':''}. No decision on the line.`;
   }
-  s.dice=d;s.busy=false;s.flash={win,lose,k:(s.flash&&s.flash.k||0)+1};s.hist.unshift(t);s.hist=s.hist.slice(0,14);
+  s.dice=d;s.busy=false;s.press=pressable.filter(p=>b[p.k]);s.flash={win,lose,k:(s.flash&&s.flash.k||0)+1};s.hist.unshift(t);s.hist=s.hist.slice(0,14);
   let tail='';if(stake||gross){const r=settle('craps',stake,gross,true);tail=' '+resText(r)}
   if(win.some(k=>k==='pass'||k==='dp')&&(b.pass||b.dp||0)>=tableMin('craps'))addGameWin('craps');
   s.msg=`<b>${d[0]} + ${d[1]} = ${t}.</b> ${call}${tail}`;
@@ -1729,11 +1744,12 @@ function gCP(){
   const chip=(k,cls)=>b[k]?`<i class="cchip ${cls||''}" data-ck="cc${k}${b[k]}" data-fx="pop">${chipTxt(b[k])}</i>`:'';
   const dis=k=>s.busy||!cpAllowed(k)?'disabled':'';
   const nums=[4,5,6,8,9,10].map(n=>`<button class="cnum ${p===n?'pt':''} ${fx('place'+n,'comeN'+n,'dcomeN'+n)}" data-a="cpbet" data-v="place${n}" ${s.busy?'disabled':''}><span class="cn">${n===6?'SIX':n===9?'NINE':n}</span><small>place ${CP_PLACE[n][0]}:${CP_PLACE[n][1]}</small>${p===n?`<b class="puck" data-ck="puck${n}${s.made||0}" data-fx="pop">ON</b>`:''}<span class="cstack">${chip('place'+n)}${chip('comeN'+n,'come')}${chip('dcomeN'+n,'dont')}</span></button>`).join('');
-  const props=[[4,6,8,10].map(n=>`<button class="cprop ${fx('hard'+n)}" data-a="cpbet" data-v="hard${n}" ${s.busy?'disabled':''}><b class="hw">${n/2}·${n/2}</b>Hard ${n}<small>${CP_HARD[n]} to 1</small>${chip('hard'+n)}</button>`).join(''),Object.entries(CP_PROP).map(([k,[n,d,o]])=>`<button class="cprop ${fx(k)}" data-a="cpbet" data-v="${k}" ${s.busy?'disabled':''}>${n}<small>${o} to 1</small>${chip(k)}</button>`).join('')].join('');
+  const props=[[4,6,8,10].map(n=>`<button class="cprop ${fx('hard'+n)}" data-a="cpbet" data-v="hard${n}" ${s.busy?'disabled':''}><b class="hw">${n/2}·${n/2}</b>Hard ${n}<small>${CP_HARD[n]} to 1</small>${chip('hard'+n)}</button>`).join(''),`<button class="cprop allhw" data-a="cpbet" data-v="hardall" ${s.busy?'disabled':''}>All hard ways<small>4 chips · ${fmt(clampBet()*4)}</small></button>`+Object.entries(CP_PROP).map(([k,[n,d,o]])=>`<button class="cprop ${fx(k)}" data-a="cpbet" data-v="${k}" ${s.busy?'disabled':''}>${n}<small>${o} to 1</small>${chip(k)}</button>`).join('')].join('');
   const tot=cpTot(),need=!p&&S.energy<1;
   return`<canvas class="pix" data-s="craps" data-fill data-max="4" width="160" height="56" aria-label="Craps dice"></canvas>
   <div class="hist">${s.hist.map(n=>`<i class="m ${n===7?'l':''}">${n}</i>`).join('')}</div>
   <p class="msg">${s.msg||(p?`Point is <b>${p}</b>. Roll it again before a 7.`:'Come-out roll. Bet the Pass Line, then roll.')}</p>
+  ${s.press&&s.press.length&&!s.busy?`<div class="box cpress"><span class="lbl">Press your bets?</span>${s.press.map(x=>{const bb=b[x.k]||0;return`<div class="prow"><span><b>${CP_LBL(x.k)}</b> won ${fmt(x.w)} · now ${fmt(bb)}</span><div class="pbtns"><button class="chip" data-a="cppress" data-v="${x.k}:full" ${S.cash>=bb?'':'disabled'}>Press +${chipTxt(bb)}</button><button class="chip" data-a="cppress" data-v="${x.k}:half">Half +${chipTxt(Math.max(1,Math.floor(bb/2)))}</button><button class="chip" data-a="cppress" data-v="${x.k}:keep">Same bet</button><button class="chip" data-a="cppress" data-v="${x.k}:down">Take down</button></div></div>`}).join('')}</div>`:''}
   <div class="cboard ${p?'pon':''}">
     <div class="cnums">${nums}</div>
     <button class="carea come ${fx('come')}" data-a="cpbet" data-v="come" ${dis('come')}>COME<small>works once the point is on · pays 1:1</small>${chip('come')}</button>
@@ -1744,8 +1760,8 @@ function gCP(){
   </div>
   <span class="lbl">Center action</span><div class="cprops">${props}</div>
   ${betBar(s.busy,'Chip size')}
-  <div class="g2"><button class="btn dim" data-a="cptake" ${s.busy||!tot?'disabled':''}>Take down bets</button><button class="btn green" data-a="cproll" ${s.busy||!tot||need?'disabled':''}>${s.busy?'Rolling...':need?'Need 1 energy':p?'Roll · free':'Come-out · 1 energy'}</button></div>
-  <p class="muted">${fmt(tot)} on the table. A new come-out roll costs 1 energy, and every roll after the point is set is free until the shooter sevens out or makes the point. Place and hard way bets are off on the come-out.</p>`;
+  <div class="cpbar"><button class="btn dim" data-a="cptake" ${s.busy||!tot?'disabled':''}>Take down</button><button class="btn green" data-a="cproll" ${s.busy||!tot||need?'disabled':''}>${s.busy?'Rolling...':need?'Need 1 energy':p?`Roll · point ${p}`:'Come-out · 1 energy'}<small>${fmt(tot)} on the table</small></button></div>
+  <p class="muted"> A new come-out roll costs 1 energy, and every roll after the point is set is free until the shooter sevens out or makes the point. Place and hard way bets are off on the come-out.</p>`;
 }
 /* ================= sportsbook ================= */
 const SPORTS={
@@ -2147,6 +2163,57 @@ const GUIDE={
 };
 function guideHTML(g){const G=GUIDE[g]&&GUIDE[g]();if(!G)return'';const mn=g==='holdem'?'':`<p class="muted">Table minimum right now: ${S&&!S.over?fmt(tableMin(g)):'depends on the debt level this game unlocks at'}. Payouts shown are your total return, bet included.</p>`;
   return`<div class="guide"><p><b style="color:var(--y)">Goal:</b> ${G.goal}</p><span class="lbl">Rules</span><ul>${G.rules.map(r=>`<li>${r}</li>`).join('')}</ul><span class="lbl">Payouts</span><table class="odd">${G.pays.map(([a,b])=>`<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</table>${G.extra?`<p class="muted">${G.extra}</p>`:''}${mn}</div>`}
+
+/* ================= run intro ================= */
+const STORIES=[
+  ['UBER FOR SNAILS','Your startup, Uber for Snails, folded on Tuesday. By Wednesday the bills had found your new address.'],
+  ['THE JET SKI','You co-signed Cousin Ray’s jet ski loan. Ray and the jet ski are now somewhere off the coast of Mexico.'],
+  ['DOWNSIZED','The pixel factory replaced you with a slightly smaller pixel. Your rent did not get the memo.'],
+  ['SURE THING','You bet your savings that the Lowtide Loansharks would go undefeated. They lost the opener 41 to 3.'],
+  ['INHERITANCE','Grandma left you her lucky dice and her debts. Mostly the debts.'],
+  ['CRYPTO WINTER','You put everything into MoonCoin at the top. Then the moon set.']
+];
+let INTRO=null;
+function introStart(){INTRO={t0:performance.now()};const step=()=>{if(!INTRO||UI.scene!=='intro')return;const c=$('canvas[data-s="intro"]');if(c){const x=c.getContext('2d');x.imageSmoothingEnabled=false;drawIntro(x,(performance.now()-INTRO.t0)/1000/SP())}requestAnimationFrame(step)};requestAnimationFrame(step)}
+function drawIntro(x,t){
+  if(RM)t=9;x.save();drawHomeW(x,200);x.restore();
+  const look=meLook();
+  // envelope slides under the door
+  const ex=t<.8?10:t<1.8?Math.round(10+(t-.8)*30):40;
+  if(t<3.4){px(x,C.w,ex,63,9,5);px(x,C.s,ex,63,9,1);px(x,C.r,ex+3,64,3,2)}
+  if(t>.6&&t<1.6&&Math.floor(t*6)%2){ptxt(x,'KNOCK',2,22,C.w,1,C.k)}
+  // sleeping, then walking to the letter
+  if(t<2.2){const zz=Math.floor(t*2)%3;px(x,C.r,64,54,30,6);person(x,70,50,Object.assign({},look,{face:-1}));ptxt(x,'Z',96-zz,40-zz*4,C.a);if(zz>0)ptxt(x,'Z',100-zz,34-zz*4,C.a)}
+  else if(t<3.4){const q=Math.min(1,(t-2.2)/1.1);person(x,Math.round(70-q*24),50,Object.assign({},look,{face:-1,step:Math.floor(t*8)%2}))}
+  else person(x,46,50,Object.assign({},look,{face:-1}));
+  // computer flashes
+  if(t>1.2&&Math.floor(t*3)%2){px(x,C.r,142,32,22,15);ptxt(x,'DUE',146,37,C.w)}
+  // the letter
+  if(t>=3.6){const p=Math.min(1,(t-3.6)/.35),h=Math.round(56*p),y=45-h/2;px(x,'rgba(26,28,44,.55)',0,0,200,90);px(x,C.w,48,y,64,h);
+    if(p>=1){px(x,C.s,48,y,64,2);ptxt(x,'PAST DUE',56,y+6,C.r,1);px(x,C.d,54,y+15,52,1);px(x,C.d,54,y+20,46,1);px(x,C.d,54,y+25,50,1);
+      const tot=fmt(S.debts.reduce((a,d)=>a+d.amt,0)).replace(',','');ptxt(x,tot,80-pw(tot,2)/2,y+31,C.k,2);
+      if(t>4.3){x.save();x.translate(98,y+46);x.rotate(-.25);const sc=t<4.5?3:2;px(x,'rgba(0,0,0,0)',0,0,1,1);ptxt(x,'OWED',-pw('OWED',sc)/2,-sc*2,C.r,sc);x.restore()}}}
+}
+function vIntro(){
+  const p=UI.introP||0,st=STORIES[S.story||0];const due=S.debts.slice().sort((a,b)=>a.due-b.due);
+  const dots=`<div class="idots">${[0,1].map(i=>`<i class="${i===p?'on':''}"></i>`).join('')}</div>`;
+  if(p===0)return`<section class="stack intro" style="padding-top:18px;gap:12px"><span class="lbl">Run ${M.runs+1}${S.heat?' · Heat '+S.heat:''}</span><h2 class="px ititle">${st[0]}</h2>
+    <canvas class="pix" data-s="intro" data-fill data-max="4" width="160" height="90" aria-label="A past-due notice slides under your door"></canvas>
+    <p class="istory">${st[1]}</p><div class="box dark"><span class="lbl">Who you owe</span>${due.map(d=>`<div class="kv"><span>${d.who}</span><b class="lose">${fmt(d.amt)} · day ${d.due}</b></div>`).join('')}<p class="muted">Pay at least half by the due day or the collectors come. You start with ${fmt(S.cash)} and Main Street.</p></div>
+    ${dots}<div class="g2"><button class="btn dim" data-a="introskip">Skip</button><button class="btn green" data-a="intronext">Your options</button></div></section>`;
+  const O=[
+    ['CASINO','East end of Main Street',`${GAME_IDS.filter(g=>gReq(g)<=S.paid).length} games open tonight. Paying debts unlocks the rest.`],
+    ['STOCKS','Your home computer',`Buy or short ${Object.keys(TICK).length} stocks. The market trends up over time, but not every company does.`],
+    ['QUIK LOANS','Vinnie, near the casino',`Borrow up to ${fmt(loanLimit())} at 30%, due in 3 days. Repay at his counter or online.`],
+    ['PAWN KING','Main Street',`Trinkets with perks that last all run. He buys them back at 50%.`],
+    ['LUCKY LOU','The park',`A new quest every day for cash, buffs or a smaller debt.`],
+    ['SIDE JOBS','Newspaper box',S.heat>=3?`Honest work for cash, up to 4 energy a day.`:`Open from Heat 3. Not available this run.`],
+    ['THE BAR & MART','Main Street',`Drinks multiply your next win. The Mart reopens after 3 debts paid.`],
+    ['LAST RESORTS','Anywhere',`Lou’s Mercy refunds 30% of your first huge loss. Totally broke? Call Vinnie or face the collectors.`]
+  ];
+  return`<section class="stack intro" style="padding-top:18px;gap:10px"><span class="lbl">Ways out of the hole</span><div class="iopts">${O.map(([a,b,c],i)=>`<div class="iopt" style="animation-delay:${i*.07}s"><b>${a}</b><small>${b}</small><p>${c}</p></div>`).join('')}</div>
+    ${dots}<div class="g2"><button class="btn dim" data-a="introback">Back</button><button class="btn green" data-a="introskip">Start day 1</button></div></section>`;
+}
 
 /* ================= coin flip ================= */
 function flAct(v){
@@ -3053,9 +3120,10 @@ function render(){
   if(S&&S.g&&S.g.pl&&!(UI.scene==='game'&&UI.game==='plinko'))S.g.pl.session=false;
   if(!M.mastFix){for(const k in M.gw){const t=tierOf(M.gw[k],k);if(t>=0)M.mastery[k]=Math.max(M.mastery[k]==null?-1:M.mastery[k],t)}M.mastFix=1}
   if(S&&!S.over&&S.sb&&!SBW&&S.sb.slate.some(g=>g.live)){S.sb.slate.forEach(g=>g.live=false);sbSettleAll(true)}
+  if(UI.scene==='intro'&&(!S||S.over))UI.scene='title';
   if(UI.scene==='collect'&&!COLL)UI.scene=S&&S.over?'over':'title';
   if(UI.scene==='game'&&S&&(!gameOpen(UI.game)||S.paid<gReq(UI.game))){UI.scene='world';UI.room='casino'}
-  const v={collect:vCollect,settings:vSettings,title:vTitle,world:vWorld,game:vGame,over:vOver,trophies:vTrophies,how:vHow,setup:vSetup,legacy:vLegacy,stats:vStats}[UI.scene]||vTitle;
+  const v={intro:vIntro,collect:vCollect,settings:vSettings,title:vTitle,world:vWorld,game:vGame,over:vOver,trophies:vTrophies,how:vHow,setup:vSetup,legacy:vLegacy,stats:vStats}[UI.scene]||vTitle;
   app.innerHTML=v();fitPix();drawScenes();
   {const t=animateNew();rollCash(t);flushFX(t)}
   if(UI.scene==='world')updatePrompt();
@@ -3151,6 +3219,10 @@ function act(a,v,el){
     case 'wr':wrAct(v);return;
     case 'sbo':sboAct(v);return;
     case 'guide':UI.guide=UI.guide===UI.game?null:UI.game;break;
+    case 'intronext':UI.introP=1;break;
+    case 'introback':UI.introP=0;render();introStart();return;
+    case 'introskip':UI.scene='world';UI.room='home';INTRO=null;save();render();toast('Home sweet home. Walk over to the computer to check your debts.');return;
+    case 'cppress':cpPress(v);return;
     case 'tierinfo':toast(`Every win at ${GAMES[UI.game].n} counts toward its tier, across all your runs: ${TIERS.map((t,i)=>t[0]+' '+tierNeed(UI.game,i)).join(', ')}. Up to ${MAST_DAY} wins per game count each day (${(S.today.mw&&S.today.mw[UI.game])||0} so far today).`);return;
     case 'pkstake':P().stake=+v;{const bb=STAKES[+v][1];UI.bet=Math.min(Math.floor(S.cash),bb*50)}break;
     case 'pkread':{const p=P().seats[+v];if(p&&!p.out){const st=PK_STY[p.sk||'pro'];toast(`<b>${p.n}</b> · ${st.n}: ${st.d}`)}return}
