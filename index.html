@@ -1223,6 +1223,7 @@ function drawHomeW(x,w){
   px(x,C.o,186,58,8,8);px(x,C.g,185,50,10,8);px(x,C.l,188,47,4,3);
 }
 const CASINO_X0=58,CASINO_DX=40;
+const floorOrder=()=>GAME_IDS.map((g,i)=>[g,i]).sort((a,b)=>gReq(a[0])-gReq(b[0])||a[1]-b[1]).map(x=>x[0]);
 function drawStation(x,g,cx){
   const G=GAMES[g],open=gameOpen(g),unl=!!S&&S.paid>=gReq(g);
   const table=(dealer)=>{person(x,cx-4,34,dealer);px(x,C.o,cx-18,50,36,14);px(x,C.g,cx-16,52,32,10);px(x,'#8a4a32',cx-14,64,3,2);px(x,'#8a4a32',cx+11,64,3,2)};
@@ -1261,7 +1262,7 @@ function drawCasinoW(x,w){
   px(x,C.r,0,66,w,24);for(let y=69;y<90;y+=5)for(let i=(y%10?0:4);i<w;i+=8)px(x,C.y,i,y,1,1);
   for(let cx=100;cx<w;cx+=120){px(x,C.y,cx,0,1,3);for(let i=0;i<5;i++)px(x,(i+frame)%2?C.w:C.y,cx-8+i*4,3,2,2)}
   px(x,C.k,10,30,20,36);px(x,C.a,12,32,7,34);px(x,C.a,21,32,7,34);px(x,C.k,10,22,20,7);ptxt(x,'EXIT',12,23,C.l);
-  GAME_IDS.forEach((g,i)=>drawStation(x,g,CASINO_X0+i*CASINO_DX));
+  floorOrder().forEach((g,i)=>drawStation(x,g,CASINO_X0+i*CASINO_DX));
 }
 function drawMartW(x,w){
   px(x,'#dde4ea',0,0,w,66);
@@ -1300,11 +1301,11 @@ function drawTitle(x){x.save();x.translate(-520,0);drawStreetW(x,760);drawWeathe
 const ROOMS_W={street:760,home:200,mart:180,bar:180};
 function roomW(r){return r==='casino'?CASINO_X0+GAME_IDS.length*CASINO_DX:ROOMS_W[r]}
 function martLabel(){return mod('fasting')?'Mart: closed by contract':!S.martOpen?'Look at the boarded-up Mart':'Enter the Mart'}
-function stationLabel(g){const G=GAMES[g];if(!gameOpen(g))return G.n+': closed by contract';if(S.paid<gReq(g))return`${G.n}: opens at ${gReq(g)} debts paid`;return'Play '+G.n}
+function stationLabel(g){const G=GAMES[g];if(!gameOpen(g))return G.n+': closed by contract';if(S.paid<gReq(g))return`${G.n}: opens at ${gReq(g)} debt${gReq(g)===1?'':'s'} paid`;return'Play '+G.n}
 function roomSpots(r){
   if(r==='street')return[{id:'home',x:30,lab:'Enter home'},{id:'mart',x:118,lab:martLabel()},{id:'casino',x:622,lab:placeOpen('casino')?'Enter the casino':'Casino: closed by contract'},{id:'bar',x:202,lab:placeOpen('bar')?'Enter the bar':'Bar: closed by contract'},{id:'bus',x:52,lab:'Bus stop: ride to the casino'},{id:'bus2',x:700,lab:'Bus stop: ride home'},{id:'news',x:145,lab:'Read the Daily Den'},{id:'lou',x:275,lab:S.quest&&S.quest.done&&!S.quest.claimed?'Collect your reward from Lucky Lou':'Talk to Lucky Lou'},{id:'fountain',x:314,lab:'Toss a coin in the fountain'},{id:'busker',x:350,lab:'Listen to Benny the busker'},{id:'pawn',x:406,lab:'Enter the Pawn King'},{id:'zora',x:458,lab:'Visit Madame Zora'},{id:'loans',x:520,lab:'Enter Quik Loans'}];
   if(r==='home')return[{id:'door',x:22,lab:'Go outside'},{id:'bed',x:72,lab:'Go to bed'},{id:'pc',x:153,lab:'Use the computer'}];
-  if(r==='casino')return[{id:'door',x:20,lab:'Go outside'},...GAME_IDS.map((g,i)=>({id:'g:'+g,x:CASINO_X0+i*CASINO_DX,lab:stationLabel(g)}))];
+  if(r==='casino')return[{id:'door',x:20,lab:'Go outside'},...floorOrder().map((g,i)=>({id:'g:'+g,x:CASINO_X0+i*CASINO_DX,lab:stationLabel(g)}))];
   if(r==='mart')return[{id:'door',x:19,lab:'Go outside'},{id:'counter',x:136,lab:'Talk to the clerk'}];
   if(r==='bar')return[{id:'door',x:19,lab:'Go outside'},{id:'barkeep',x:92,lab:'Order at the bar'}];
   return[];
