@@ -631,8 +631,8 @@ function rollReqs(){const ladder=GAME_IDS.map(g=>GAMES[g].req).sort((a,b)=>a-b);
 const gReq=g=>S&&S.req&&S.req[g]!=null?S.req[g]:GAMES[g].req;
 const CRED=['Landlord','Uncle Vic','Cousin Ray','Pawn King','Mrs. Fenwick','Big Tony','1st Pixel Bank','Loan-O-Matic','The Twins','Mr. Gold','Dentist','Gus’s Brother'];
 const MART={
-  dog:{n:'Hot Dog',d:'+1 energy. Limit 5 a day.',p:6,lim:5},
-  drink:{n:'Volt Energy',d:'+4 energy. Limit 3 a day.',p:22,lim:3},
+  dog:{n:'Hot Dog',d:'+5 energy. Limit 5 a day.',p:6,lim:5},
+  drink:{n:'Volt Energy',d:'+20 energy. Limit 3 a day.',p:22,lim:3},
   scratch:{n:'Scratch-Off',d:'Instant prizes up to $1,000. Limit 10 a day.',p:10,lim:10},
   charm:{n:'Lucky Charm',d:'+10% on every win until you sleep.',p:60,lim:1},
   tip:{n:'Insider Tip',d:'See tomorrow\u2019s move for one random stock.',p:40,lim:1}
@@ -640,9 +640,9 @@ const MART={
 const DRINKS=['Pixel Punch','8-Bit Bomb','Neon Fizz','Glitch Sour','Bling Sling','Debt Collector','Blue Screen','Cartridge Blower'];
 const DRINK_ROLLS=[[.1,10],[.5,18],[1,24],[1.5,24],[2,17],[3,7]];
 const SKILLS={
-  stam1:{b:'Stamina',n:'Second Wind',d:'+3 energy every day.',c:1},
-  stam2:{b:'Stamina',n:'Night Owl',d:'+3 more energy.',c:2,req:'stam1'},
-  stam3:{b:'Stamina',n:'Iron Liver',d:'+3 more energy.',c:3,req:'stam2'},
+  stam1:{b:'Stamina',n:'Second Wind',d:'+15 energy every day.',c:1},
+  stam2:{b:'Stamina',n:'Night Owl',d:'+15 more energy.',c:2,req:'stam1'},
+  stam3:{b:'Stamina',n:'Iron Liver',d:'+15 more energy.',c:3,req:'stam2'},
   luck1:{b:'Luck',n:'Lucky Socks',d:'+5% on every win.',c:1},
   luck2:{b:'Luck',n:'Golden Touch',d:'+5% more on every win.',c:2,req:'luck1'},
   hag1:{b:'Charm',n:'Haggler',d:'Mart and bar 15% cheaper.',c:1},
@@ -740,7 +740,7 @@ const MODS={
 };
 const LEGACY={
   cash:{n:'Nest Egg',d:'+$50 starting cash per rank.',max:20,base:3},
-  energy:{n:'Morning Person',d:'+1 energy every day per rank.',max:10,base:5},
+  energy:{n:'Morning Person',d:'+5 energy every day per rank.',max:10,base:5},
   luck:{n:'Horseshoe',d:'+1% on every win per rank.',max:25,base:4},
   credit:{n:'Credit Score',d:'Debts are 2% smaller per rank.',max:15,base:6},
   head:{n:'Head Start',d:'Start each run with +1 skill point per rank.',max:5,base:10},
@@ -873,7 +873,12 @@ function newG(){return{
   sbo:{pick:'big',dice:[2,4,6],busy:false,msg:'',hist:[],k:0}
 }}
 const sk=k=>S&&S.skills[k]?1:0;
-function maxEnergy(){return mod('tired')?6:10+3*(sk('stam1')+sk('stam2')+sk('stam3'))+L('energy')}
+const ES=5;
+const ECOST={holdem:1,bj:2,roulette:2,craps:4,sports:3,plinko:4,mines:2,flip:1,snail:2,slots:1,wheel:1,baccarat:1,crash:2,tower:2,keno:1,vpoker:2,penguin:2,hilo:2,scratch:2,dice:1,war:1,sicbo:1};
+const SNG_E=25;
+const ecost=g=>ECOST[g]||1;
+const ecostLabel=g=>g==='holdem'?'1 per hand':g==='plinko'?ECOST.plinko+' per session':g==='craps'?ECOST.craps+' per come-out':g==='sports'?ECOST.sports+' per slip':ecost(g)+' per round';
+function maxEnergy(){return mod('tired')?6*ES:10*ES+3*ES*(sk('stam1')+sk('stam2')+sk('stam3'))+ES*L('energy')}
 function disc(){return 1-.15*(sk('hag1')+sk('hag2'))}
 function mkStocks(){const o={};for(const k in TICK)o[k]={p:TICK[k].p,h:[TICK[k].p],own:0,cost:0,short:0,sColl:0};return o}
 function gauss(){let u=0,v=0;while(!u)u=rnd();while(!v)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
@@ -886,7 +891,7 @@ function mkDebt(bal){
 }
 function newRun(cfg){
   cfg=cfg||{heat:0,mods:[]};UI.lastCfg=cfg;
-  S={req:rollReqs(),day:1,cash:100+50*L('cash'),energy:10,heat:cfg.heat||0,mods:(cfg.mods||[]).slice(),daily:cfg.daily||null,ext:L('ext'),martOpen:false,tipK:null,buffs:[],trinkets:{},karma:0,pawned:{},lastBet:{},
+  S={req:rollReqs(),day:1,cash:100+50*L('cash'),energy:10*ES,heat:cfg.heat||0,mods:(cfg.mods||[]).slice(),daily:cfg.daily||null,ext:L('ext'),martOpen:false,tipK:null,buffs:[],trinkets:{},karma:0,pawned:{},lastBet:{},
      debts:[],debtN:0,lastDue:2,strikes:0,paid:0,sp:L('head'),skills:{},
      today:{games:[],buy:{},bar:0},charm:false,drink:null,tip:false,stocks:mkStocks(),next:null,
      stats:{won:0,biggest:0,peak:100},newAch:[],newTiers:0,g:newG(),over:null,lvl0:M.lvl};
@@ -981,7 +986,7 @@ const nextDue=()=>{const d=S.debts.filter(d=>!d.loan).sort((a,b)=>a.due-b.due)[0
 const QSP={bj:[['bj_nat','Hit a blackjack',1],['bj_split','Win a split hand at blackjack',1]],roulette:[['rl_inside','Win a split, street, corner or six-line bet at roulette',1]],crash:[['crash3','Cash out of Crash at 3x or higher',1]],mines:[['mines5','Cash out of Mines with 5 or more gems',1]],tower:[['tower4','Cash out of Dragon Tower after 4 or more floors',1]],penguin:[['peng5','Cash out of Penguin Cross after 5 or more lanes',1]],plinko:[['plinko3','Land a 3x or better in Plinko',1]],holdem:[['pk_show','Win a poker hand at showdown',1]],keno:[['keno3','Hit 3 or more Keno numbers',1]],vpoker:[['vp2p','Make two pair or better in Video Poker',1]],slots:[['slots_win','Win on the slots 3 times',3]],snail:[['snail_win','Win a Snail Derby bet',1]],wheel:[['wheel_big','Win a Green, Red or Gold bet on the Money Wheel',1]],baccarat:[['bc_banker','Win a Banker bet at baccarat',1]],flip:[['flip3','Win 3 coin flips in a row',1]]};
 function makeReward(){
   const cash=r5(Math.max(40,nextDue()*.3));
-  const R=[{t:'cash',v:cash,text:`${fmt(cash)} in cash`},{t:'hot',v:.2,text:'Hot Streak: +20% on every win tomorrow'},{t:'net',v:.25,text:'Safety Net: 25% of every loss refunded tomorrow'},{t:'energy',v:6,text:'+6 energy tomorrow morning'},{t:'sp',v:1,text:'+1 skill point'},{t:'relief',v:.2,text:'Debt Relief: your next debt shrinks by 20%'},{t:'tip',v:1,text:'An insider tip on tomorrow’s market'},{t:'charmw',v:2,text:'A Lucky Charm today plus 2x profit on your next win'}];
+  const R=[{t:'cash',v:cash,text:`${fmt(cash)} in cash`},{t:'hot',v:.2,text:'Hot Streak: +20% on every win tomorrow'},{t:'net',v:.25,text:'Safety Net: 25% of every loss refunded tomorrow'},{t:'energy',v:6*ES,text:'+30 energy tomorrow morning'},{t:'sp',v:1,text:'+1 skill point'},{t:'relief',v:.2,text:'Debt Relief: your next debt shrinks by 20%'},{t:'tip',v:1,text:'An insider tip on tomorrow’s market'},{t:'charmw',v:2,text:'A Lucky Charm today plus 2x profit on your next win'}];
   return R[Math.floor(rnd()*R.length)];
 }
 function makeQuest(){
@@ -1028,7 +1033,7 @@ function louPanel(){
 function fountainAct(){
   if(S.fountainDay===S.day||S.cash<1)return;S.fountainDay=S.day;S.cash-=1;const r=rnd();
   if(r<.45)S.fmsg='Plop. Nothing happens. A pigeon looks disappointed in you.';
-  else if(r<.65){S.energy+=2;S.fmsg='The mist feels refreshing. +2 energy.'}
+  else if(r<.65){S.energy+=2*ES;S.fmsg='The mist feels refreshing. +10 energy.'}
   else if(r<.8){const a=r5(20+rnd()*Math.max(30,nextDue()*.15));S.cash+=a;S.fmsg=`Something glints in the water. You fish out ${fmt(a)}!`;SFX.win()}
   else if(r<.93){S.wish=1.5;S.fmsg='Your wish is heard. Your next win pays 1.5x profit.';ach('wish')}
   else{S.tipK=Object.keys(TICK)[Math.floor(rnd()*4)];S.fmsg=`The ripples spell out a ticker: ${S.tipK}. (Stock tip added.)`}
@@ -1039,7 +1044,7 @@ function tipAct(a){
   if(S.cash<a)return;const before=Math.floor(S.karma/100);S.cash-=a;S.karma+=a;questEvent('tip');SFX.coin();
   S.bmsg=`Benny tips his hat. "Much obliged!"`;
   if(Math.floor(S.karma/100)>before){const r=Math.floor(rnd()*4);
-    if(r===0){S.energy+=3;S.bmsg='Benny plays your song. You feel pumped. +3 energy.'}
+    if(r===0){S.energy+=3*ES;S.bmsg='Benny plays your song. You feel pumped. +15 energy.'}
     else if(r===1){S.charm=true;S.bmsg='Benny plays a lucky tune. Lucky Charm active until you sleep.'}
     else if(r===2){S.wish=1.5;S.bmsg='Benny plays a ballad about winners. Your next win pays 1.5x profit.'}
     else{S.tipK=Object.keys(TICK)[Math.floor(rnd()*4)];S.bmsg=`Between songs Benny whispers: "Watch ${S.tipK} tomorrow." (Stock tip added.)`}
@@ -1047,7 +1052,7 @@ function tipAct(a){
   if(S.karma>=500)ach('busker');
 }
 function buskerPanel(){const nx=100-(S.karma%100);return`<div class="box"><span class="lbl">Benny the busker</span><p>"${['This one’s called Rent Is Due.','Requests? I know four chords.','Every coin in the case brings good vibes, friend.'][S.day%3]}"</p><p class="muted">Tips this run: ${fmt(S.karma)}. Every $100 in tips, Benny plays you a lucky song (${fmt(nx)} to go).</p>${S.bmsg?`<p class="win">${S.bmsg}</p>`:''}<div class="g3">${[5,25,100].map(a=>`<button class="btn sm" data-a="tip" data-v="${a}" ${S.cash<a?'disabled':''}>Tip ${fmt(a)}</button>`).join('')}</div></div>`}
-const TRINKETS={watch:{n:'Gold Watch',d:'+5% on every win.',p:300},foot:{n:'Rabbit’s Foot',d:'Your first loss each day is refunded in full.',p:250},dice:{n:'Lucky Dice',d:'+1 energy every morning.',p:200},boots:{n:'Running Shoes',d:'Walk around town much faster.',p:120},ring:{n:'Pinky Ring',d:'Bar drinks never roll below 1x.',p:350},piggy:{n:'Piggy Bank',d:'2% interest on your cash each night, up to $1,000.',p:500},shades:{n:'Poker Shades',d:'Poker players read you as strong and fold more.',p:400}};
+const TRINKETS={watch:{n:'Gold Watch',d:'+5% on every win.',p:300},foot:{n:'Rabbit’s Foot',d:'Your first loss each day is refunded in full.',p:250},dice:{n:'Lucky Dice',d:'+5 energy every morning.',p:200},boots:{n:'Running Shoes',d:'Walk around town much faster.',p:120},ring:{n:'Pinky Ring',d:'Bar drinks never roll below 1x.',p:350},piggy:{n:'Piggy Bank',d:'2% interest on your cash each night, up to $1,000.',p:500},shades:{n:'Poker Shades',d:'Poker players read you as strong and fold more.',p:400}};
 const HOUSE={tv:['Your TV',80],console:['Your game console',60],jacket:['Your leather jacket',40],guitar:['Your old guitar',30]};
 const tprice=k=>r5(TRINKETS[k].p*(1+.1*(S.day-1)));
 function pawnPanel(){
@@ -1061,7 +1066,7 @@ function zoraAct(){
   const open=GAME_IDS.filter(g=>gameOpen(g)&&S.paid>=gReq(g));
   if(r<.7&&open.length){const g=open[Math.floor(rnd()*open.length)];S.favor={day:S.day,g};S.zmsg=`"The cards favor ${GAMES[g].n} today." +25% profit on every ${GAMES[g].n} win until you sleep.`}
   else if(r<.85){S.tipK=Object.keys(TICK)[Math.floor(rnd()*4)];S.zmsg=`"I see... ${S.tipK}. Its future is clear to me." (Stock tip added.)`}
-  else{S.energy+=3;S.zmsg='"The spirits grant you vigor." +3 energy.'}
+  else{S.energy+=3*ES;S.zmsg='"The spirits grant you vigor." +15 energy.'}
   SFX.ach();
 }
 function zoraPanel(){const used=S.zoraDay===S.day;return`<div class="box"><span class="lbl">Madame Zora</span><p>"Cross my palm with silver and I shall tell you where fortune smiles today."</p>${used&&S.zmsg?`<p class="win">${S.zmsg}</p>`:''}<button class="btn wide" data-a="zora" ${used||S.cash<zoraFee()?'disabled':''}>${used?'The spirits rest until tomorrow':'Get a reading · '+fmt(zoraFee())}</button></div>`}
@@ -1070,10 +1075,10 @@ function loanAct(a){if(S.debts.some(d=>d.loan)||a<5)return;S.cash+=a;S.loanN=(S.
 function loanPanel(){const act=S.debts.find(d=>d.loan),lim=loanLimit();
   return`<div class="box"><span class="lbl">Quik Loans · Vinnie</span><p>"Need cash fast? 30% fee, due in 3 days. Pay me here or online, I’m not picky. Don’t make me come looking."</p>
   ${act?`<p class="lose">You owe Vinnie ${fmt(act.amt)} by day ${act.due}. Miss it and the collectors come.</p><div class="g2"><button class="btn green sm" data-a="pay" data-v="${act.id}" ${S.cash>=act.amt?'':'disabled'}>Pay back ${fmt(act.amt)}</button><button class="btn sm" data-a="paypart" data-v="${act.id}" ${S.cash>=1&&S.cash<act.amt?'':'disabled'}>Pay ${fmt(Math.min(Math.floor(S.cash),act.amt))}</button></div>`:`<div class="g3">${[.25,.5,1].map(f=>{const a=r5(lim*f);return`<button class="btn sm" data-a="loan" data-v="${a}">Borrow ${fmt(a)}</button>`}).join('')}</div><p class="muted">One loan at a time. Your limit grows as you pay off debts.</p>`}</div>`}
-const JOBS=[['flyers','Hand out flyers',1],['dishes','Wash dishes at the bar',2],['dog','Walk Mrs. Fenwick\u2019s dog',3]];
+const JOBS=[['flyers','Hand out flyers',1],['dishes','Wash dishes at the bar',2],['dog','Walk Mrs. Fenwick\u2019s dog',3]];const JOB_MAX=4;
 const jobRate=()=>r5(Math.max(8,nextDue()*.05));
-function jobAct(k){const j=JOBS.find(x=>x[0]===k);if(!j)return;const e=j[2],w=S.today.work||0;if(S.energy<e||w+e>4)return;S.energy-=e;S.today.work=w+e;const pay=jobRate()*e;S.cash+=pay;SFX.coin();toast(`${j[1]}: +${fmt(pay)}.`);checkCash()}
-function jobsHTML(){const w=S.today.work||0,r=jobRate();return`<div class="box dark"><span class="lbl">Help wanted · Heat 3+</span><p class="muted">Honest work for when the cards go cold. ${fmt(r)} per energy, up to 4 energy a day (${4-w} left today).</p>${JOBS.map(([k,n,e])=>`<div class="kv bl"><span>${n} <span class="muted">${e} energy</span></span><button class="linkb" data-a="job" data-v="${k}" ${S.energy<e||w+e>4?'disabled':''}>Earn ${fmt(r*e)}</button></div>`).join('')}</div>`}
+function jobAct(k){const j=JOBS.find(x=>x[0]===k);if(!j)return;const e=j[2],w=S.today.work||0;if(S.energy<e*ES||w+e>JOB_MAX)return;S.energy-=e*ES;S.today.work=w+e;const pay=jobRate()*e;S.cash+=pay;SFX.coin();toast(`${j[1]}: +${fmt(pay)}.`);checkCash()}
+function jobsHTML(){const w=S.today.work||0,r=jobRate();return`<div class="box dark"><span class="lbl">Help wanted · Heat 3+</span><p class="muted">Honest work for when the cards go cold. ${fmt(r)} per shift, up to ${JOB_MAX} shifts a day (${JOB_MAX-w} left today). Each shift takes ${ES} energy.</p>${JOBS.map(([k,n,e])=>`<div class="kv bl"><span>${n} <span class="muted">${e*ES} energy</span></span><button class="linkb" data-a="job" data-v="${k}" ${S.energy<e*ES||w+e>JOB_MAX?'disabled':''}>Earn ${fmt(r*e)}</button></div>`).join('')}</div>`}
 const HEAD=['Local man insists he is "due" for a win','Pigeon population hits record high near fountain','Casino adds more velvet rope, experts baffled','Mart hot dogs rated "technically food"','Snail Derby champion retires to lettuce farm','Lucky Lou spotted handing out odd jobs again','Gus denies wearing sunglasses indoors to hide tells','MoonCoin investors "very calm," sources say','Busker Benny learns fifth chord','Madame Zora predicts this headline'];
 function newsPanel(){
   if(!S.paper||S.paper.day!==S.day){const ks=Object.keys(TICK),k=ks[Math.floor(rnd()*4)],truth=S.next[k]>=1;S.paper={day:S.day,k,up:rnd()<.65?truth:!truth,h:HEAD[Math.floor(rnd()*HEAD.length)]}}
@@ -1110,10 +1115,10 @@ function drawStreetExtra(x){
 
 /* ================= betting core ================= */
 function clampBet(){if(!S)return 0;const c=Math.floor(Math.min(S.cash,mod('low')?250:Infinity));let v=Math.round(UI.bet)||0;const mn=curMin();if(v>0&&v<mn)v=mn;return v<=0?0:Math.min(v,c)}
-function canPlay(){return!!S&&!S.over&&(S.energy>0||(UI.scene==='game'&&UI.game==='plinko'&&S.g.pl.session))&&S.cash>=1&&clampBet()>=Math.max(1,curMin())}
+function canPlay(){return!!S&&!S.over&&(S.energy>=ecost(UI.game)||(UI.scene==='game'&&UI.game==='plinko'&&S.g.pl.session))&&S.cash>=1&&clampBet()>=Math.max(1,curMin())}
 function busy(){if(!S)return false;const g=S.g;return g.bj.phase==='play'||g.mn.phase==='play'||(g.pk.seated&&g.pk.phase==='play')||g.rl.busy||g.pl.busy||g.fl.busy||g.sn.busy||g.sl.busy||g.wh.busy||g.kn.busy||g.cr.phase==='fly'||g.tw.phase==='play'||g.vp.phase==='hold'||g.pg.phase==='play'||(g.cp&&g.cp.busy)||(g.hl&&g.hl.phase==='play')||(g.sc&&g.sc.phase==='play')||(g.wr&&g.wr.phase==='war')||(g.dc&&g.dc.busy)||(g.sbo&&g.sbo.busy)||!!SBW}
 function placeBet(game,b){
-  S.cash-=b;if(game==='plinko'){if(!S.g.pl.session){S.energy--;S.g.pl.session=true}}else S.energy--;const st=gs(game);st.r++;st.bet+=b;addXP(2);checkTiers();
+  S.cash-=b;if(game==='plinko'){if(!S.g.pl.session){S.energy-=ecost('plinko');S.g.pl.session=true}}else S.energy-=ecost(game);const st=gs(game);st.r++;st.bet+=b;addXP(2);checkTiers();
   if(!S.today.games.includes(game)){S.today.games.push(game);if(S.today.games.length>=7)ach('tourist')}
   S.lastBet=S.lastBet||{};S.lastBet[game]=b;questEvent('play',{game});
   save();
@@ -1509,7 +1514,7 @@ function drawRWheel(x,wa,ball){
 }
 function rlRest(x){const s=S.g.rl;drawRWheel(x,s.wa||0,s.last!=null?{a:(s.wa||0)+WHEEL.indexOf(s.last)*SEG,r:52}:null)}
 function rlSpin(){
-  const s=S.g.rl,tot=rlTotal();if(s.busy||!tot||S.energy<=0||tot>S.cash)return;if(tot<tableMin('roulette')){toast(`Table minimum is ${fmt(tableMin('roulette'))} total.`);return}
+  const s=S.g.rl,tot=rlTotal();if(s.busy||!tot||S.energy<ecost('roulette')||tot>S.cash)return;if(tot<tableMin('roulette')){toast(`Table minimum is ${fmt(tableMin('roulette'))} total.`);return}
   s.lastBets=Object.assign({},s.bets);placeBet('roulette',tot);s.busy=true;s.msg='No more bets!';UI.rlPick=null;const res=Math.floor(rnd()*37);
   render();window.scrollTo({top:0,behavior:RM?'auto':'smooth'});
   const fin=()=>{let g=0;const wins=[];for(const k in s.bets){const ns=betNums(k);if(ns.includes(res)){g+=s.bets[k]*36/ns.length;wins.push(betLabel(k))}}
@@ -1591,7 +1596,7 @@ function brokeBase(){
   if(S.cash>=need)return false;
   if(portfolio()>=1)return false;
   if(Object.keys(S.trinkets||{}).length)return false;
-  if(S.heat>=3&&((S.energy>=1&&(S.today.work||0)<4)||!S.debts.some(d=>d.due<=S.day&&minRem(d)>0)))return false;
+  if(S.heat>=3&&((S.energy>=ES&&(S.today.work||0)<4)||!S.debts.some(d=>d.due<=S.day&&minRem(d)>0)))return false;
   if(S.quest&&S.quest.done&&!S.quest.claimed)return false;
   if(S.sb&&S.sb.bets&&S.sb.bets.some(b=>b.st==='open'))return false;
   if(S.g&&S.g.cp&&Object.keys(S.g.cp.bets).length)return false;
@@ -1677,7 +1682,7 @@ const CP_FIXED=k=>['pass','dp','come','dcome'].includes(k)||k.startsWith('comeN'
 function cpTakeDown(){const s=S.g.cp;if(s.busy)return;let back=0;for(const k in s.bets){if(CP_FIXED(k)&&s.point)continue;back+=s.bets[k];delete s.bets[k]}if(back){S.cash+=back;SFX.coin();toast(`Took down ${fmt(back)}.`)}s.flash=null;save();render()}
 function cpRoll(){
   const s=S.g.cp;if(s.busy||!cpTot())return;
-  if(!s.point){if(S.energy<1){toast('A new come-out roll takes 1 energy.');return}placeBet('craps',0)}
+  if(!s.point){if(S.energy<ecost('craps')){toast(`A new come-out roll takes ${ecost('craps')} energy.`);return}placeBet('craps',0)}
   s.busy=true;s.flash=null;s.press=null;const d=[1+Math.floor(rnd()*6),1+Math.floor(rnd()*6)];render();
   if(RM)return cpResolve(d);
   const c=$('canvas[data-s="craps"]');if(c)c.scrollIntoView({block:'center',behavior:RM?'auto':'smooth'});
@@ -1756,7 +1761,7 @@ function gCP(){
   const dis=k=>s.busy||!cpAllowed(k)?'disabled':'';
   const nums=[4,5,6,8,9,10].map(n=>`<button class="cnum ${p===n?'pt':''} ${fx('place'+n,'comeN'+n,'dcomeN'+n)}" data-a="cpbet" data-v="place${n}" ${s.busy?'disabled':''}><span class="cn">${n===6?'SIX':n===9?'NINE':n}</span><small>place ${CP_PLACE[n][0]}:${CP_PLACE[n][1]}</small>${p===n?`<b class="puck" data-ck="puck${n}${s.made||0}" data-fx="pop">ON</b>`:''}<span class="cstack">${chip('place'+n)}${chip('comeN'+n,'come')}${chip('dcomeN'+n,'dont')}</span></button>`).join('');
   const props=[[4,6,8,10].map(n=>`<button class="cprop ${fx('hard'+n)}" data-a="cpbet" data-v="hard${n}" ${s.busy?'disabled':''}><b class="hw">${n/2}·${n/2}</b>Hard ${n}<small>${CP_HARD[n]} to 1</small>${chip('hard'+n)}</button>`).join(''),`<button class="cprop allhw" data-a="cpbet" data-v="hardall" ${s.busy?'disabled':''}>All hard ways<small>4 chips · ${fmt(clampBet()*4)}</small></button>`+Object.entries(CP_PROP).map(([k,[n,d,o]])=>`<button class="cprop ${fx(k)}" data-a="cpbet" data-v="${k}" ${s.busy?'disabled':''}>${n}<small>${o} to 1</small>${chip(k)}</button>`).join('')].join('');
-  const tot=cpTot(),need=!p&&S.energy<1;
+  const tot=cpTot(),need=!p&&S.energy<ecost('craps');
   return`<canvas class="pix" data-s="craps" data-fill data-max="4" width="160" height="56" aria-label="Craps dice"></canvas>
   <div class="hist">${s.hist.map(n=>`<i class="m ${n===7?'l':''}">${n}</i>`).join('')}</div>
   <p class="msg">${s.msg||(p?`Point is <b>${p}</b>. Roll it again before a 7.`:'Come-out roll. Bet the Pass Line, then roll.')}</p>
@@ -1771,8 +1776,8 @@ function gCP(){
   </div>
   <span class="lbl">Center action</span><div class="cprops">${props}</div>
   ${betBar(s.busy,'Chip size')}
-  <div class="cpbar"><button class="btn dim" data-a="cptake" ${s.busy||!tot?'disabled':''}>Take down</button><button class="btn green" data-a="cproll" ${s.busy||!tot||need?'disabled':''}>${s.busy?'Rolling...':need?'Need 1 energy':p?`Roll · point ${p}`:'Come-out · 1 energy'}<small>${fmt(tot)} on the table</small></button></div>
-  <p class="muted"> A new come-out roll costs 1 energy, and every roll after the point is set is free until the shooter sevens out or makes the point. Place and hard way bets are off on the come-out.</p>`;
+  <div class="cpbar"><button class="btn dim" data-a="cptake" ${s.busy||!tot?'disabled':''}>Take down</button><button class="btn green" data-a="cproll" ${s.busy||!tot||need?'disabled':''}>${s.busy?'Rolling...':need?`Need ${ecost('craps')} energy`:p?`Roll · point ${p}`:`Come-out · ${ecost('craps')} energy`}<small>${fmt(tot)} on the table</small></button></div>
+  <p class="muted"> A new come-out roll costs ${ecost('craps')} energy, and every roll after the point is set is free until the shooter sevens out or makes the point. Place and hard way bets are off on the come-out.</p>`;
 }
 /* ================= sportsbook ================= */
 const SPORTS={
@@ -1979,7 +1984,7 @@ function gSB(){
   const slip=s.slip.filter(l=>{const g=sbGame(l.gid);return g&&!g.res});
   const slipBox=slip.length?`<div class="box sbslip"><span class="lbl">Bet slip · ${slip.length>1?slip.length+'-leg parlay':'single'}</span>${slip.map(l=>{const g=sbGame(l.gid);return`<div class="kv bl"><span>${pickName(g,l.pick)} <span class="muted">${SPORTS[g.sp].tag} · ${Math.round(g.o[l.pick]*100)}%</span></span><button class="linkb" data-a="sbpick" data-v="${g.id}:${l.pick}">Remove</button></div>`}).join('')}
     <div class="kv"><span>Hits about</span><b>${Math.max(.1,Math.round(slipProb()*1000)/10)}% of the time</b></div><div class="kv"><span>Pays</span><b class="px" style="color:var(--y);font-size:12px">${slipMult().toFixed(2)}x · ${fmt(Math.round(clampBet()*slipMult()))}</b></div></div>
-    ${betBar(!!SBW,'Stake')}<button class="btn green wide" data-a="sbplace" ${canPlay()&&!SBW?'':'disabled'}>Place ${slip.length>1?'parlay':'bet'} · 1 energy</button>`:'';
+    ${betBar(!!SBW,'Stake')}<button class="btn green wide" data-a="sbplace" ${canPlay()&&!SBW?'':'disabled'}>Place ${slip.length>1?'parlay':'bet'} · ${ecost('sports')} energy</button>`:'';
   return watch+tabs+body+slipBox;
 }
 /* ================= hi-lo ================= */
@@ -2104,27 +2109,27 @@ const gpct=x=>(Math.round(x*1000)/10)+'%';
 const GUIDE={
   holdem:()=>({goal:'Win chips from 7 computer players with the best five-card poker hand, or by making everyone else fold.',
     rules:['Everyone gets 2 private cards. Five shared cards come out in stages: the flop (3), the turn (1) and the river (1).','Each round you can fold, check or call, or raise any amount up to all your chips (No-Limit).','Best five-card hand using any of your 2 cards and the 5 shared cards wins the pot. Side pots handle all-ins.','The odds box shows your chance to win right now and the pot odds you need to call.',
-      'Cash games: pick a stake, buy in for 20 to 100 big blinds (default 50). Sitting down costs 3 energy, then every hand is free. Leave between hands to cash out.',
-      'Sit & Go: 5 energy. Everyone starts with 1,500 chips, blinds rise every few hands, and you play until one player has everything.'],
+      'Cash games: pick a stake and buy in for 20 to 100 big blinds (default 50). Each hand costs 1 energy. Leave between hands to cash out.',
+      `Sit & Go: ${SNG_E} energy to enter, then every hand is free. Everyone starts with 1,500 chips, blinds rise every few hands, and you play until one player has everything.`],
     pays:[['Cash game','Whatever you win at the table'],['Sit & Go, 8 players','1st 4x · 2nd 2.4x · 3rd 1.6x buy-in'],['Sit & Go, 6 players','1st 4x · 2nd 2x buy-in'],['Sit & Go, 3 players','Winner 3x buy-in']],
     extra:'Hand ranks, best first: royal flush, straight flush, four of a kind, full house, flush, straight, three of a kind, two pair, one pair, high card.'}),
   bj:()=>({goal:'Beat the dealer’s hand without going over 21.',
     rules:['Cards 2-10 count face value, J/Q/K count 10, aces count 1 or 11.','Hit for another card, stand to stop. Over 21 is a bust and loses.','Double: on your first two cards, double your bet and take exactly one more card.','Split: two cards of the same value become two hands with equal bets, up to 4 hands. Split aces get one card each. 21 on a split hand is not a blackjack.','The dealer draws until reaching 17 or more, and stands on all 17s.'],
     pays:[['Win','2x (1:1)'],['Blackjack (ace + 10-value on the deal)','2.5x (3:2)'],['Push (tie)','Bet returned'],['Dealer blackjack','You lose unless you also have one']]}),
   roulette:()=>({goal:'Guess where the ball lands on a single-zero wheel of 0 to 36.',
-    rules:['Pick a chip size, then tap spots on the board. You can stack many bets on one spin.','Inside bets cover specific numbers. Outside bets cover big groups.','0 is green: every outside bet loses when it hits.','Spinning costs 1 energy, no matter how many chips are down.'],
+    rules:['Pick a chip size, then tap spots on the board. You can stack many bets on one spin.','Inside bets cover specific numbers. Outside bets cover big groups.','0 is green: every outside bet loses when it hits.',`Spinning costs ${ECOST.roulette} energy, no matter how many chips are down.`],
     pays:[['Straight up (1 number)','36x (35:1)'],['Split (2 numbers)','18x (17:1)'],['Street (3)','12x (11:1)'],['Corner (4)','9x (8:1)'],['Six line (6)','6x (5:1)'],['Dozen or column (12)','3x (2:1)'],['Red/black, odd/even, 1-18/19-36','2x (1:1)']],
     extra:'House edge on every bet: 2.7%.'}),
   craps:()=>({goal:'Bet on the dice. The shooter tries to roll the point again before rolling a 7.',
-    rules:['Come-out roll: 7 or 11 wins the Pass Line, 2, 3 or 12 (craps) loses. Any other number becomes the point and the puck turns ON.','Point is on: roll the point again to win the Pass Line. Roll a 7 first ("seven out") and it loses.','The come-out roll costs 1 energy. Every roll after that is free until the point is made or the shooter sevens out.','Place and hard way bets are off on the come-out roll. Take down any bet that isn’t locked in with Take down bets.'],
+    rules:['Come-out roll: 7 or 11 wins the Pass Line, 2, 3 or 12 (craps) loses. Any other number becomes the point and the puck turns ON.','Point is on: roll the point again to win the Pass Line. Roll a 7 first ("seven out") and it loses.','The come-out roll costs ${ECOST.craps} energy. Every roll after that is free until the point is made or the shooter sevens out.','Place and hard way bets are off on the come-out roll. Take down any bet that isn’t locked in with Take down bets.'],
     pays:[['Pass Line / Come','2x (1:1)'],['Don’t Pass / Don’t Come','2x (1:1), a 12 on the come-out pushes'],['Odds behind the Pass Line (up to 3x)','4 or 10 pay 2:1, 5 or 9 pay 3:2, 6 or 8 pay 6:5. No house edge.'],['Place 4 or 10','Wins 9:5'],['Place 5 or 9','Wins 7:5'],['Place 6 or 8','Wins 7:6'],['Field (one roll: 2,3,4,9,10,11,12)','2x, a 2 pays 3x, a 12 pays 4x'],['Hard 4 or 10 (doubles before easy way or 7)','Wins 7:1'],['Hard 6 or 8','Wins 9:1'],['Any 7 (one roll)','5x (4:1)'],['Any craps: 2, 3 or 12 (one roll)','8x (7:1)'],['Yo 11 (one roll)','16x (15:1)'],['Aces 2 or Boxcars 12 (one roll)','31x (30:1)']],
     extra:'Mastery only counts a win when your Pass or Don’t Pass bet wins.'}),
   sports:()=>({goal:'Bet on today’s games across basketball, baseball, soccer, tennis, football and hockey.',
-    rules:['Each side shows its chance to win as a percentage. Soccer can end in a draw, so it has three choices.','Tap one side for a single bet, or 2 to 6 sides from different games for a parlay. Every leg of a parlay must win.','Placing a bet slip costs 1 energy.','Watch any game as a live pixel broadcast, or sim it straight to the final. Watching a game locks it, so bet first.','Bets still open when you sleep settle overnight. A new slate of games arrives every day.'],
+    rules:['Each side shows its chance to win as a percentage. Soccer can end in a draw, so it has three choices.','Tap one side for a single bet, or 2 to 6 sides from different games for a parlay. Every leg of a parlay must win.',`Placing a bet slip costs ${ECOST.sports} energy.`,'Watch any game as a live pixel broadcast, or sim it straight to the final. Watching a game locks it, so bet first.','Bets still open when you sleep settle overnight. A new slate of games arrives every day.'],
     pays:[['Single bet','About 0.95 ÷ win chance. A 50% side pays 1.90x.'],['Parlay','Every leg’s multiplier multiplied together. Three 50% legs pay about 6.86x.']],
     extra:'Teams that win gain strength for the rest of the run, so records matter.'}),
   plinko:()=>({goal:'Drop a ball through 8 rows of pegs and land it in a payout slot.',
-    rules:['Each peg bounces the ball left or right at random, so the middle slots are the most likely.','Plinko costs 1 energy per session. Drop as many balls as you like until you leave.','Low risk pays steadier middles. High risk pays huge edges and very little in the middle.'],
+    rules:['Each peg bounces the ball left or right at random, so the middle slots are the most likely.',`Plinko costs ${ECOST.plinko} energy per session. Drop as many balls as you like until you leave.`,'Low risk pays steadier middles. High risk pays huge edges and very little in the middle.'],
     pays:[['Slot (chance)','Low · Normal · High'],['Edge (0.4% each side)',`${PRISK.low[0]}x · ${PRISK.normal[0]}x · ${PRISK.high[0]}x`],['Next (3.1% each side)',`${PRISK.low[1]}x · ${PRISK.normal[1]}x · ${PRISK.high[1]}x`],['Middle-out (10.9% each side)',`${PRISK.low[2]}x · ${PRISK.normal[2]}x · ${PRISK.high[2]}x`],['Near center (21.9% each side)',`${PRISK.low[3]}x · ${PRISK.normal[3]}x · ${PRISK.high[3]}x`],['Center (27.3%)',`${PRISK.low[4]}x · ${PRISK.normal[4]}x · ${PRISK.high[4]}x`]]}),
   mines:()=>({goal:'Reveal gems on a 5×5 grid and cash out before you hit a mine.',
     rules:['Choose how many mines hide among the 25 tiles: 1, 3, 5, 10 or 24.','Tap tiles one at a time. Each gem raises your multiplier.','Cash out any time after your first gem. Hit a mine and you lose the bet.'],
@@ -2218,7 +2223,7 @@ function vIntro(){
     ['QUIK LOANS','Vinnie, near the casino',`Borrow up to ${fmt(loanLimit())} at 30%, due in 3 days. Repay at his counter or online.`],
     ['PAWN KING','Main Street',`Trinkets with perks that last all run. He buys them back at 50%.`],
     ['LUCKY LOU','The park',`A new quest every day for cash, buffs or a smaller debt.`],
-    ['SIDE JOBS','Newspaper box',S.heat>=3?`Honest work for cash, up to 4 energy a day.`:`Open from Heat 3. Not available this run.`],
+    ['SIDE JOBS','Newspaper box',S.heat>=3?`Honest work for cash, up to 4 shifts (5 energy each) a day.`:`Open from Heat 3. Not available this run.`],
     ['THE BAR & MART','Main Street',`Drinks multiply your next win. The Mart reopens after 3 debts paid.`],
     ['LAST RESORTS','Anywhere',`Lou’s Mercy refunds 30% of your first huge loss. Totally broke? Call Vinnie or face the collectors.`]
   ];
@@ -2781,7 +2786,7 @@ const activeSeat=p=>p.st>0;
 function nextActive(i){const s=P();for(let k=1;k<=8;k++){const j=(i+k)%8;if(activeSeat(s.seats[j]))return j}return i}
 const SNG_PAY={8:[4,2.4,1.6],6:[4,2],3:[3]};
 function pkSit(b,mode,size){
-  const s=P(),ec=mode==='tour'?5:3;if(S.energy<ec)return;S.energy-=ec;S.cash-=b;S.lastBet=S.lastBet||{};S.lastBet.holdem=b;
+  const s=P(),ec=mode==='tour'?SNG_E:1;if(S.energy<ec)return;if(mode==='tour')S.energy-=ec;S.cash-=b;S.lastBet=S.lastBet||{};S.lastBet.holdem=b;
   const names=PK_NAMES.slice().sort(()=>rnd()-.5);
   s.seated=true;s.buyin=b;s.handNo=0;s.tour=null;s.msg='';s.phase='idle';s.btn=Math.floor(rnd()*8);
   if(mode==='tour'){
@@ -2803,6 +2808,7 @@ function pkDeal(){
   if(!s.seated)return;
   if(me.st<=0){if(s.tour)return pkTourEnd();return pkLeave()}
   if(s.tour&&s.seats.filter(activeSeat).length===1)return pkTourEnd();
+  if(!s.tour){if(S.energy<1){s.msg='Out of energy. Cash out and get some sleep.';toast('Each cash hand costs 1 energy. You’re out.');save();render();return}S.energy--}
   addXP(1);
   if(!s.tour)s.seats.forEach((p,i)=>{if(i>0&&p.st<=0){const used=s.seats.map(q=>q.n);const nm=PK_NAMES.find(n=>!used.includes(n))||'Stranger';Object.assign(p,{n:nm,st:Math.round(s.bb*(40+rnd()*110)),sk:pickSty()});s.log.push(`${nm} takes the empty seat.`)}});
   s.handNo++;
@@ -3067,7 +3073,7 @@ function extDebt(id){const d=S.debts.find(x=>x.id===id);if(!d||S.ext<1)return;d.
 function buySkill(k){
   const n=SKILLS[k];if(S.skills[k]||S.sp<n.c||(n.req&&!S.skills[n.req]))return;
   S.sp-=n.c;S.skills[k]=true;ach('skill');if(Object.keys(SKILLS).every(q=>S.skills[q]))ach('tree');
-  if(k.startsWith('stam'))S.energy+=3;SFX.coin();
+  if(k.startsWith('stam'))S.energy+=3*ES;SFX.coin();
 }
 function stockTrade(k,v){
   const st=S.stocks[k];
@@ -3082,7 +3088,7 @@ function sleep(){
   S.debts.forEach(d=>{if(d.due<=S.day&&canRoll(d)){d.amt=r5(d.amt*1.25);d.orig=d.amt;d.paidAmt=0;d.due=S.day+3;d.late=(d.late||0)+1;S.strikes=(S.strikes||0)+1;toast(`${d.who} rolled over: ${fmt(d.amt)} due day ${d.due}.`)}});
   let interest=0;if(L('interest')){interest=Math.min(2000,Math.round(S.cash*.005*L('interest')));S.cash+=interest}
   if(trinket('piggy')){const pi=Math.min(1000,Math.round(S.cash*.02));S.cash+=pi;interest+=pi}
-  S.day++;S.energy=maxEnergy()+buffV('energy')+trinket('dice');S.today={games:[],buy:{},bar:0};S.charm=false;S.tipK=sk('insider')?Object.keys(TICK)[Math.floor(rnd()*4)]:null;
+  S.day++;S.energy=maxEnergy()+buffV('energy')+ES*trinket('dice');S.today={games:[],buy:{},bar:0};S.charm=false;S.tipK=sk('insider')?Object.keys(TICK)[Math.floor(rnd()*4)]:null;
   for(const k in S.stocks){const st=S.stocks[k];st.p=Math.max(.01,st.p*(S.next[k]||1));st.h.push(st.p);if(st.h.length>24)st.h.shift()}
   for(const k in S.stocks){const st=S.stocks[k];if(st.short&&2*st.sColl-st.short*st.p<=0){st.short=0;st.sColl=0;toast(`Margin call: your ${k} short was wiped out.`)}}
   S.next=rollMoves();
@@ -3124,8 +3130,8 @@ const drinkRolls=()=>DRINK_ROLLS.filter(([m])=>!(L('bar')>=1&&m===.1)&&!(L('bar'
 function martBuy(k){
   const it=MART[k],pr=mprice(k),n=S.today.buy[k]||0;if(n>=it.lim||S.cash<pr)return;
   S.cash-=pr;S.today.buy[k]=n+1;questEvent('buy');M.items++;if(M.items>=100)ach('items100');SFX.coin();
-  if(k==='dog'){S.energy+=1;UI.martMsg='You wolf down a hot dog. +1 energy.'}
-  else if(k==='drink'){S.energy+=4;UI.martMsg='Volt Energy hits hard. +4 energy.'}
+  if(k==='dog'){S.energy+=ES;UI.martMsg='You wolf down a hot dog. +5 energy.'}
+  else if(k==='drink'){S.energy+=4*ES;UI.martMsg='Volt Energy hits hard. +20 energy.'}
   else if(k==='charm'){S.charm=true;UI.martMsg='The Lucky Charm is warm in your pocket. +10% on wins until you sleep.'}
   else if(k==='tip'){S.tipK=Object.keys(TICK)[Math.floor(rnd()*4)];UI.martMsg=`The clerk slides you a folded note about <b>${S.tipK}</b>. Check Stocks on your computer at home.`}
   else if(k==='scratch'){const r=rnd();const prize=r<.002?1000:r<.02?100:r<.10?30:r<.30?10:0;S.cash+=prize;if(prize>=1000)ach('scratch');
@@ -3315,7 +3321,7 @@ function trophyList(){
 function vGame(){
   const g=UI.game,gw=gWins(g),gt=tierOf(gw,g),nx=TIERS[gt+1]?[TIERS[gt+1][0],tierNeed(g,gt+1)]:null,body={holdem:gPK,bj:gBJ,roulette:gRL,plinko:gPL,mines:gMN,flip:gFL,snail:gSN,slots:gSL,wheel:gWH,baccarat:gBC,crash:gCR,tower:gTW,keno:gKN,vpoker:gVP,penguin:gPG,craps:gCP,sports:gSB,hilo:gHL,scratch:gSC,dice:gDC,war:gWR,sicbo:gSBO}[g]();
   const badge=`<button class="tierb ${gt>=0?'t'+gt:''}" data-a="tierinfo">${gt>=0?TIERS[gt][0].toUpperCase()+' TIER':'NO TIER YET'} · ${gw} lifetime win${gw===1?'':'s'}${curMin()?' · min '+fmt(curMin()):''}${nx?` · ${nx[1]-gw} more for ${nx[0]}`:' · maxed'}</button>`;
-  return hud()+topbar(GAMES[g].n,'casino',`<small>${S.energy} energy</small>`)+`<button class="guideb" data-a="guide" aria-expanded="${UI.guide===g}">${UI.guide===g?'Hide the rules':'How to play '+GAMES[g].n+' · rules &amp; payouts'}</button>`+(UI.guide===g?`<div class="box dark">${guideHTML(g)}</div>`:'')+badge+`<div class="gwrap stack ${gt>=0?'tier-'+TIERS[gt][0].toLowerCase():''}">${body}</div>`;
+  return hud()+topbar(GAMES[g].n,'casino',`<small>${S.energy} energy · ${ecostLabel(g)}</small>`)+`<button class="guideb" data-a="guide" aria-expanded="${UI.guide===g}">${UI.guide===g?'Hide the rules':'How to play '+GAMES[g].n+' · rules &amp; payouts'}</button>`+(UI.guide===g?`<div class="box dark">${guideHTML(g)}</div>`:'')+badge+`<div class="gwrap stack ${gt>=0?'tier-'+TIERS[gt][0].toLowerCase():''}">${body}</div>`;
 }
 function gBJ(){
   const s=S.g.bj,hide=s.phase==='play';
@@ -3342,7 +3348,7 @@ function gRL(){
   const keys=Object.keys(b);
   const pick=UI.rlPick;
   const bar=pick?`<span class="lbl">${RL_MODES.find(m=>m[0]===s.mode)[1]} bets that include ${pick.n}</span><div class="g2">${pick.o.map(a=>`<button class="btn blue sm" data-a="rlpick" data-v="${ik(a)}">${betLabel(ik(a))} · ${36/a.length-1}:1</button>`).join('')}</div><button class="btn dim sm" data-a="rlcancel">Cancel</button>`
-    :`<div class="kv"><span>Total on the table</span><b class="px" style="font-size:12px;color:var(--y)">${fmt(tot)}</b></div><button class="btn green wide" data-a="rlspin" ${!busy&&tot>0&&S.energy>0&&tot<=S.cash?'':'disabled'}>${busy?'Spinning...':tot?'Spin':'Place a chip to spin'}</button>`;
+    :`<div class="kv"><span>Total on the table</span><b class="px" style="font-size:12px;color:var(--y)">${fmt(tot)}</b></div><button class="btn green wide" data-a="rlspin" ${!busy&&tot>0&&S.energy>=ecost('roulette')&&S.energy>0&&tot<=S.cash?'':'disabled'}>${busy?'Spinning...':tot?'Spin':'Place a chip to spin'}</button>`;
   return`<canvas class="pix" data-s="rwheel" data-fill data-max="2" width="160" height="160" aria-label="Roulette wheel"></canvas>
   <div class="hist">${s.hist.map(n=>`<i class="${rcls(n)}">${n}</i>`).join('')}</div>
   <p class="msg">${s.msg||'Single-zero wheel. Pick a chip size, then tap the board to bet.'}</p>
@@ -3362,7 +3368,7 @@ function gPL(){
   const rk=s.risk||'normal';
   return`<canvas class="pix" data-s="plinko" width="${PLW}" height="${PLH}" data-max="4" aria-label="Plinko board"></canvas><div class="hist">${s.hist.map(m=>`<i class="m">${m}x</i>`).join('')}</div>
   <div class="opts" style="grid-template-columns:repeat(3,1fr)">${[['low','Low risk'],['normal','Normal'],['high','High risk']].map(([k,l])=>`<button class="opt ${rk===k?'on':''}" data-a="plrisk" data-v="${k}" ${s.busy?'disabled':''}>${l}<small>edges ${PRISK[k][0]}x · middle ${PRISK[k][4]}x</small></button>`).join('')}</div>
-  <p class="muted" style="font-size:17px">${s.session?'Session open: drops are free of energy until you leave Plinko.':'Plinko costs 1 energy per session. Drop as many balls as you like until you leave.'}</p>
+  <p class="muted" style="font-size:17px">${s.session?'Session open: drops are free of energy until you leave Plinko.':`Plinko costs ${ECOST.plinko} energy per session. Drop as many balls as you like until you leave.`}</p>
   <p class="msg">${s.msg||'&nbsp;'}</p>${betBar(s.busy)}<button class="btn green wide" data-a="pldrop" ${!s.busy&&canPlay()?'':'disabled'}>Drop ball</button>`;
 }
 function gMN(){
@@ -3393,11 +3399,11 @@ function gPK(){
   if(!s.seated){
     const mode=UI.pkMode||'cash',st=STAKES[s.stake||0],minB=st[1]*20,maxB=st[1]*100;
     const lobby=mode==='cash'?`<span class="lbl">Table stakes (blinds)</span><div class="opts" style="grid-template-columns:repeat(5,1fr)">${STAKES.map(([a,b],i)=>`<button class="opt ${(s.stake||0)===i?'on':''}" data-a="pkstake" data-v="${i}">${chipTxt(a)}/${chipTxt(b)}<small>${fmt(b*20)}+</small></button>`).join('')}</div>
-      <p class="muted">Buy in for ${fmt(minB)} to ${fmt(maxB)} (20 to 100 big blinds). Sitting down costs 3 energy, then play as many hands as you like and cash out any time.</p>
-      ${betBar(false,'Buy-in')}<button class="btn green wide" data-a="pk" data-v="sit" ${S.energy>=3&&S.cash>=minB?'':'disabled'}>${S.cash>=minB?'Sit down':'Need '+fmt(minB)+' for this table'}</button>`
+      <p class="muted">Buy in for ${fmt(minB)} to ${fmt(maxB)} (20 to 100 big blinds). Each hand costs 1 energy. Cash out any time between hands.</p>
+      ${betBar(false,'Buy-in')}<button class="btn green wide" data-a="pk" data-v="sit" ${S.energy>=1&&S.cash>=minB?'':'disabled'}>${S.cash>=minB?'Sit down':'Need '+fmt(minB)+' for this table'}</button>`
     :(()=>{const sz=UI.sngSize||8,pay=SNG_PAY[sz];return`<span class="lbl">Table size</span><div class="opts" style="grid-template-columns:repeat(3,1fr)">${[[8,'Top 3 paid'],[6,'Top 2 paid'],[3,'Winner only']].map(([n,d])=>`<button class="opt ${sz===n?'on':''}" data-a="sngsize" data-v="${n}">${n} players<small>${d}</small></button>`).join('')}</div>
-      <div class="box dark"><p>Sit & Go: ${sz} players, 1,500 chips each, blinds rise every ${sz===8?6:sz===6?5:4} hands. Play until one player has every chip. Costs 5 energy.</p><table class="odd">${pay.map((m,i)=>`<tr><td>${['1st','2nd','3rd'][i]} place</td><td>${m}x buy-in${clampBet()?` (${fmt(clampBet()*m)})`:''}</td></tr>`).join('')}</table></div>
-      ${betBar(false,'Sit & Go buy-in')}<button class="btn green wide" data-a="pk" data-v="tour" ${S.energy>=5&&clampBet()>=20?'':'disabled'}>${S.energy>=5?'Start the Sit & Go':'Need 5 energy'}</button>`})();
+      <div class="box dark"><p>Sit & Go: ${sz} players, 1,500 chips each, blinds rise every ${sz===8?6:sz===6?5:4} hands. Play until one player has every chip. Costs ${SNG_E} energy to enter, then every hand is free.</p><table class="odd">${pay.map((m,i)=>`<tr><td>${['1st','2nd','3rd'][i]} place</td><td>${m}x buy-in${clampBet()?` (${fmt(clampBet()*m)})`:''}</td></tr>`).join('')}</table></div>
+      ${betBar(false,'Sit & Go buy-in')}<button class="btn green wide" data-a="pk" data-v="tour" ${S.energy>=SNG_E&&clampBet()>=20?'':'disabled'}>${S.energy>=SNG_E?'Start the Sit & Go':'Need '+SNG_E+' energy'}</button>`})();
     return`<canvas class="pix" data-s="gus" data-fill data-anim width="160" height="90" aria-label="Gus at the poker table"></canvas>
     <div class="g2"><button class="tab ${mode==='cash'?'on':''}" data-a="pkmode" data-v="cash">Cash game</button><button class="tab ${mode==='tour'?'on':''}" data-a="pkmode" data-v="tour">Sit & Go</button></div>
     <p class="msg">${s.msg||'8-handed No-Limit Hold’em with a real deck. Every player has a style. Tap a seat to read them.'}</p>${lobby}`;
@@ -3507,20 +3513,20 @@ function vHow(){return topbar('How to play','title')+`<div class="box">
   <p><b class="px" style="font-size:10px;color:var(--y)">THE DEAL.</b> You start with $100 and two debts. Each one has a due day. Pay it at your home computer before you sleep on that day, or the collectors end your run.</p>
   <p><b class="px" style="font-size:10px;color:var(--y)">DEBTS GROW.</b> Paying a debt brings in a new one, due a couple of days later, along with the next chapter of your story. Each new debt is sized from the debt ladder and your balance when you pay (cash, stocks, chips on the table and open bets): the more you\u2019re holding, the more they want, between 60% and 300% of the ladder amount. Every Heat tier has its own 30-chapter storyline, with a cutscene showing how each debt happened. Your place in each storyline carries over between runs. Clearing day 15 of a Heat for the first time plays its ending, finishing a storyline plays its finale, and clearing Heat 30 plays something special. Can\u2019t pay it all? Pay at least half by the due day and the rest rolls over 2 days with a 25% late fee. You get 3 late strikes per run.</p>
   <p><b class="px" style="font-size:10px;color:var(--y)">BUS.</b> Bus stops outside your home and the casino skip the long walk. The bus doesn\u2019t stop at the park, so check in with Lucky Lou first. From Heat 3, the newspaper box lists side jobs that pay for energy.</p>
-  <p><b class="px" style="font-size:10px;color:var(--y)">ENERGY.</b> Every casino round costs 1 energy. Sleep to refill it, or buy snacks at the Mart.</p>
+  <p><b class="px" style="font-size:10px;color:var(--y)">ENERGY.</b> You get ${maxEnergy()} energy a day (50 to start). Longer games cost more per round: ${['holdem','slots','flip','baccarat','roulette','crash','snail','bj','mines','tower','hilo'].map(g=>GAMES[g].n+' '+ecost(g)).join(', ')}. Craps costs ${ECOST.craps} per come-out, Plinko ${ECOST.plinko} per session, a sports slip ${ECOST.sports} and a Sit & Go ${SNG_E}. Every game shows its cost at the top. Sleep to refill, or buy snacks at the Mart.</p>
   <p><b class="px" style="font-size:10px;color:var(--y)">SKILLS.</b> Each paid debt gives a skill point to spend on more energy, bigger wins, cheaper shopping or smarter play.</p>
   <p><b class="px" style="font-size:10px;color:var(--y)">GETTING AROUND.</b> Walk with the arrow buttons (or arrow keys), or tap where you want to go. Press the big button to use whatever you’re standing next to: doors, your computer, your bed, the clerk, the bartender and every casino game.</p>
   <p><b class="px" style="font-size:10px;color:var(--y)">AROUND TOWN.</b> Lucky Lou in the park hands out a new quest every day. Finish it and walk back to him for a reward: cash, a Hot Streak or Safety Net for tomorrow, extra energy, a skill point, a smaller debt and more. Further down Main Street: Benny the busker plays lucky songs for tips, the fountain grants one wish a day, the Pawn King sells run-long trinkets, Madame Zora blesses one game per day, and Quik Loans lends cash at 30%. The newspaper box by the Mart has a daily market rumor.</p>
   <p><b class="px" style="font-size:10px;color:var(--y)">BETS.</b> Every bet panel has Clear, Repeat (your last bet in that game) and Double. At roulette, Repeat last and Double last rebuild your previous spin’s whole layout.</p>
   <p><b class="px" style="font-size:10px;color:var(--y)">UNLOCKS.</b> Seven games are open on day 1. Paying off debts opens more: Slots at 1, Money Wheel at 2, Baccarat at 3, Crash at 4, Dragon Tower at 5, Keno at 6, Video Poker at 8 and Penguin Cross at 10. The boarded-up Mart can be reopened once you’ve paid off 3 debts.</p>
-  <p><b class="px" style="font-size:10px;color:var(--y)">MASTERY.</b> Every win at a game counts toward its tier across all your runs: Bronze, Silver, Gold, Emerald, Ruby and Diamond. Higher tiers restyle that game\u2019s cards and table, put a gem on its casino sign and unlock cosmetics. Up to 15 wins per game count each day, so tiers can\u2019t be farmed. Table minimums depend on the debt level a game unlocks at: day-1 games start at $2, late games at $30 to $75, and every minimum rises 10% per debt paid and per Heat level. Plinko costs 1 energy per session and has Low, Normal and High risk boards.</p>
-  <p><b class="px" style="font-size:10px;color:var(--y)">CRAPS.</b> Bet the Pass Line and roll the come-out: 7 or 11 wins, 2, 3 or 12 loses, anything else sets the point. Roll the point again before a 7 to win. Back it with Odds (true odds, no house edge), add Come, Place, Field, hard ways and one-roll props. The come-out roll costs 1 energy, and every roll after it is free until the shooter sevens out or makes the point.</p>
-  <p><b class="px" style="font-size:10px;color:var(--y)">SPORTSBOOK.</b> Every day has a slate of games across basketball, baseball, soccer, tennis, football and hockey. Odds are shown as each side\u2019s chance to win. Pick one side for a single bet, or 2 to 6 sides for a parlay that pays the multipliers stacked together. Each slip costs 1 energy. Watch any game as a live pixel broadcast, or sim it to the final. Open bets settle overnight.</p>
+  <p><b class="px" style="font-size:10px;color:var(--y)">MASTERY.</b> Every win at a game counts toward its tier across all your runs: Bronze, Silver, Gold, Emerald, Ruby and Diamond. Higher tiers restyle that game\u2019s cards and table, put a gem on its casino sign and unlock cosmetics. Up to 15 wins per game count each day, so tiers can\u2019t be farmed. Table minimums depend on the debt level a game unlocks at: day-1 games start at $2, late games at $30 to $75, and every minimum rises 10% per debt paid and per Heat level. Plinko costs ${ECOST.plinko} energy per session and has Low, Normal and High risk boards.</p>
+  <p><b class="px" style="font-size:10px;color:var(--y)">CRAPS.</b> Bet the Pass Line and roll the come-out: 7 or 11 wins, 2, 3 or 12 loses, anything else sets the point. Roll the point again before a 7 to win. Back it with Odds (true odds, no house edge), add Come, Place, Field, hard ways and one-roll props. The come-out roll costs ${ECOST.craps} energy, and every roll after it is free until the shooter sevens out or makes the point.</p>
+  <p><b class="px" style="font-size:10px;color:var(--y)">SPORTSBOOK.</b> Every day has a slate of games across basketball, baseball, soccer, tennis, football and hockey. Odds are shown as each side\u2019s chance to win. Pick one side for a single bet, or 2 to 6 sides for a parlay that pays the multipliers stacked together. Each slip costs ${ECOST.sports} energy. Watch any game as a live pixel broadcast, or sim it to the final. Open bets settle overnight.</p>
   <p><b class="px" style="font-size:10px;color:var(--y)">BROKE?</b> When you have no cash, nothing to pawn, no loan left and no bets out, a Face the Collectors button appears so you can end the run on your own terms. If Vinnie will still lend, you get the choice: borrow or face them. Once per run, Lucky Lou refunds 30% of your first loss that wipes out half your bankroll.</p>
   <p><b class="px" style="font-size:10px;color:var(--y)">SHUFFLED CASINO.</b> Every run deals a new casino lineup: which games are open on day 1 and which unlock as you pay off debts is random. Day 1 shows tonight\u2019s lineup. Buy day-one passes in Legacy to guarantee your favorite games a starting slot.</p>
   <p><b class="px" style="font-size:10px;color:var(--y)">STOCKS.</b> Four stocks move once a night. Buy to bet on a rise, or short to bet on a fall. An Insider Tip from the Mart shows tomorrow’s move for one random stock.</p>
   <p><b class="px" style="font-size:10px;color:var(--y)">THE BAR.</b> A drink multiplies the profit on your next win, from 0.1x up to 3x.</p>
-  <p><b class="px" style="font-size:10px;color:var(--y)">POKER.</b> Pick your stakes at a cash table, or enter a Sit & Go: 8 players (top 3 paid), 6 players (top 2) or 3 players (winner takes all). Each player has a style (Fish, Loose, Rock, Maniac, Pro, and Gus the Shark); tap a seat to read them. A cash table costs 3 energy to sit down and a Sit & Go costs 5. After that, hands are free. A full 8-handed table with a real 52-card deck and side pots. Your odds against the players still in the hand come from simulating thousands of run-outs, and all-in odds are exact once one or two cards are left to come.</p>
+  <p><b class="px" style="font-size:10px;color:var(--y)">POKER.</b> Pick your stakes at a cash table, or enter a Sit & Go: 8 players (top 3 paid), 6 players (top 2) or 3 players (winner takes all). Each player has a style (Fish, Loose, Rock, Maniac, Pro, and Gus the Shark); tap a seat to read them. Each cash-game hand costs 1 energy. A Sit & Go costs ${SNG_E} energy to enter, then its hands are free. A full 8-handed table with a real 52-card deck and side pots. Your odds against the players still in the hand come from simulating thousands of run-outs, and all-in odds are exact once one or two cards are left to come.</p>
   <p><b class="px" style="font-size:10px;color:var(--y)">REP &amp; LEGACY.</b> Every run pays Rep when it ends. Leveling up and trophy ladders pay Rep too. Spend it on permanent Legacy upgrades and wardrobe items.</p>
   <p><b class="px" style="font-size:10px;color:var(--y)">HEAT.</b> Reach day 15 at your highest Heat to unlock the next level, up to 30. Higher Heat means bigger debts and more Rep.</p>
   <p><b class="px" style="font-size:10px;color:var(--y)">CONTRACTS.</b> Optional rules that make a run harder for more Rep. New ones unlock as you level up.</p>
@@ -3719,8 +3725,8 @@ function act(a,v,el){
     case 'vp':vpAct(v,el.dataset.i);return;
     case 'pg':pgAct(v,el.dataset.i);return;
     case 'pk':
-      if(v==='sit'){const ps=P(),bb=STAKES[ps.stake||0][1];let b=clampBet();if(S.energy<3){toast('A cash table takes 3 energy to sit down.');return}if(b<bb*20){if(S.cash>=bb*20){b=bb*20;toast(`Minimum buy-in at this table is ${fmt(bb*20)}.`)}else return}if(b>bb*100){b=bb*100;toast(`Maximum buy-in at this table is ${fmt(bb*100)}.`)}pkSit(b,'cash');return}
-      if(v==='tour'){const b=clampBet();if(S.energy<5){toast('A Sit & Go takes 5 energy.');return}if(b<20){toast('Sit & Go buy-in is at least <b>$20</b>.');return}pkSit(b,'tour',UI.sngSize||8);return}
+      if(v==='sit'){const ps=P(),bb=STAKES[ps.stake||0][1];let b=clampBet();if(S.energy<1){toast('Each cash hand costs 1 energy. You’re out.');return}if(b<bb*20){if(S.cash>=bb*20){b=bb*20;toast(`Minimum buy-in at this table is ${fmt(bb*20)}.`)}else return}if(b>bb*100){b=bb*100;toast(`Maximum buy-in at this table is ${fmt(bb*100)}.`)}pkSit(b,'cash');return}
+      if(v==='tour'){const b=clampBet();if(S.energy<SNG_E){toast(`A Sit & Go takes ${SNG_E} energy.`);return}if(b<20){toast('Sit & Go buy-in is at least <b>$20</b>.');return}pkSit(b,'tour',UI.sngSize||8);return}
       if(v==='forfeit'){pkForfeit();return}
       if(v==='deal'){pkDeal();return}
       if(v==='leave'){pkLeave();return}
